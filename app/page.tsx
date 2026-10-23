@@ -3,6 +3,7 @@ import { Menu } from "@/components/Menu";
 import { formatarReais, nomeDoMes, statusDoMes } from "@/lib/calculo";
 import { carregarContexto, carregarExtrato, competenciaAtual, hojeISO } from "@/lib/dados";
 import { sair } from "./login/actions";
+import { TIPOS_DESPESA } from "@/lib/tipos";
 
 const ROTULO = { quitado: "Quitado", aberto: "Aberto", atrasado: "Em atraso" } as const;
 
@@ -45,12 +46,12 @@ export default async function Painel() {
         <section className="cartao">
           <h2>Composição do mês</h2>
           <div className="linha"><span>Pensão ({mes.percentualPensao}% de {formatarReais(mes.salarioMinimo)})</span><span className="num">{formatarReais(mes.pensao)}</span></div>
-          <div className="linha"><span>Despesas da decisão (saldo)</span><span className="num">{formatarReais(mes.despesasDecisao)}</span></div>
-          <div className="linha"><span>Despesas combinadas</span><span className="num">{formatarReais(mes.despesasCombinadas)}</span></div>
+          <div className="linha"><span>Despesas médicas e escolares (saldo)</span><span className="num">{formatarReais(mes.despesasDecisao)}</span></div>
+          <div className="linha"><span>Natação, van, roupas e outras</span><span className="num">{formatarReais(mes.despesasCombinadas)}</span></div>
           <div className="linha"><span>Já pago</span><span className="num">{formatarReais(mes.pago)}</span></div>
           <div className="divisor" />
           <div className="linha suave"><span>Vai no recibo judicial</span><span className="num">{formatarReais(mes.totalRecibo)}</span></div>
-          <div className="linha suave"><span>Vai no demonstrativo</span><span className="num">{formatarReais(mes.totalDemonstrativo)}</span></div>
+          <div className="linha suave"><span>Vai no recibo extra</span><span className="num">{formatarReais(mes.totalDemonstrativo)}</span></div>
         </section>
 
         {devedorAnterior > 0 && (
@@ -78,7 +79,7 @@ export default async function Painel() {
                     {d.descricao}
                     <small>
                       {d.paga_por === "pagador" ? "Pago pelo pai" : "Pago pela mãe"} ·{" "}
-                      {d.categoria === "decisao" ? "decisão" : "combinada"}
+                      {TIPOS_DESPESA[d.tipo].rotulo}
                       {d.contestada_em ? " · contestada" : ""}
                     </small>
                   </Link>

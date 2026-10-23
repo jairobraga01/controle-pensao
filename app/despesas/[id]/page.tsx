@@ -5,6 +5,7 @@ import { efeitoNoDevido, formatarReais, nomeDoMes } from "@/lib/calculo";
 import { linksDosComprovantes } from "@/lib/comprovantes";
 import { carregarContexto, paraDespesa, type LinhaDespesa } from "@/lib/dados";
 import { contestar } from "./actions";
+import { TIPOS_DESPESA, nomeDoRecibo } from "@/lib/tipos";
 
 const DIVISAO = { metade: "50% cada", integral: "100%", fixo: "valor fixo para o pai" };
 
@@ -29,7 +30,7 @@ export default async function DetalheDespesa({ params }: { params: Promise<{ id:
           <div className="linha"><span>Valor total</span><span className="num">{formatarReais(d.valor_centavos)}</span></div>
           <div className="linha"><span>Data</span><span>{d.data.split("-").reverse().join("/")}</span></div>
           <div className="linha"><span>Pago por</span><span>{d.paga_por === "pagador" ? "Pai" : "Mãe"}</span></div>
-          <div className="linha"><span>Tipo</span><span>{d.categoria === "decisao" ? "Prevista na decisão" : "Combinada"}</span></div>
+          <div className="linha"><span>Tipo</span><span>{TIPOS_DESPESA[d.tipo].rotulo} · {nomeDoRecibo(d.categoria).toLowerCase()}</span></div>
           <div className="linha">
             <span>Divisão</span>
             <span>

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { lerReais } from "@/lib/calculo";
 import { arquivosDoForm, salvarComprovantes, validarArquivos } from "@/lib/comprovantes";
 import { carregarContexto, carregarLancamentos, paraDespesa, resumir } from "@/lib/dados";
-import { itensDoRecibo } from "@/lib/recibo";
+import { TIPOS_RECIBO, itensDoRecibo, valorDoRecibo } from "@/lib/recibo";
 
 export async function registrarPagamento(form: FormData) {
   const ctx = await carregarContexto();
@@ -39,30 +39,37 @@ export async function registrarPagamento(form: FormData) {
     erro(`Pagamento salvo, mas o comprovante falhou: ${(e as Error).message}`);
   }
 
-  await gerarRecibo(competencia);
-  redirect(`/recibos/${competencia}`);
+  await gerarRecibos(competencia);
+  redirect(`/recibos/${competencia}/judicial`);
 }
 
-/** Cria ou atualiza o recibo do mês, enquanto a mãe ainda não confirmou. */
-async function gerarRecibo(competencia: string) {
+/** Cria ou atualiza os recibos do mês, enquanto a mãe ainda não confirmou. */
+async function gerarRecibos(competencia: string) {
   const ctx = await carregarContexto();
   const { despesas, pagamentos } = await carregarLancamentos(ctx, competencia);
   const resumo = resumir(ctx, competencia, despesas, pagamentos);
   const validas = despesas.filter((d) => !d.contestada_em).map(paraDespesa);
-  const linha = {
-    processo_id: ctx.processo.id,
-    competencia,
-    valor_centavos: resumo.totalRecibo,
-    itens: itensDoRecibo(resumo, validas),
-    gerado_por: ctx.user.id,
-    gerado_em: new Date().toISOString(),
-  };
-  const { data: existente } = await ctx.supabase
+  const { data: existentes } = await ctx.supabase
     .from("recibos")
-    .select("id, confirmado_em")
+    .select("id, tipo, confirmado_em")
     .eq("processo_id", ctx.processo.id)
-    .eq("competencia", competencia)
-    .maybeSingle();
-  if (!existente) await ctx.supabase.from("recibos").insert(linha);
-  else if (!existente.confirmado_em) await ctx.supabase.from("recibos").update(linha).eq("id", existente.id);
+    .eq("competencia", competencia);
+
+  for (const tipo of TIPOS_RECIBO) {
+    const itens = itensDoRecibo(tipo, resumo, validas);
+    const existente = existentes?.find((r) => r.tipo === tipo);
+    // Mês sem despesas combinadas não tem recibo extra.
+    if (tipo === "extra" && itens.length === 0 && !existente) continue;
+    const linha = {
+      processo_id: ctx.processo.id,
+      competencia,
+      tipo,
+      valor_centavos: valorDoRecibo(tipo, resumo),
+      itens,
+      gerado_por: ctx.user.id,
+      gerado_em: new Date().toISOString(),
+    };
+    if (!existente) await ctx.supabase.from("recibos").insert(linha);
+    else if (!existente.confirmado_em) await ctx.supabase.from("recibos").update(linha).eq("id", existente.id);
+  }
 }

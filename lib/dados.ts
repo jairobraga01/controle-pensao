@@ -11,6 +11,7 @@ import {
   type SalarioMinimo,
 } from "./calculo";
 import { criarClienteServidor } from "./supabase/server";
+import type { TipoDespesa } from "./tipos";
 
 export type Papel = "pagador" | "recebedora" | "advogado";
 
@@ -18,6 +19,7 @@ export interface LinhaDespesa {
   id: string;
   competencia: string;
   descricao: string;
+  tipo: TipoDespesa;
   valor_centavos: number;
   data: string;
   paga_por: Parte;

@@ -9,14 +9,24 @@ instalado no celular ("Adicionar à tela inicial").
 - **Painel do mês:** pensão (percentual do salário mínimo vigente), saldo das despesas da
   decisão, despesas combinadas, quanto já foi pago e o que falta, com status
   aberto / em atraso / quitado.
-- **Lançar despesa** com comprovante obrigatório (foto ou PDF). Cada despesa é
-  "prevista na decisão" (entra no recibo judicial) ou "combinada" (entra só no
-  demonstrativo). Divisão 50/50, 100% de uma parte ou valor fixo para o pai.
+- **Lançar despesa** com comprovante obrigatório (foto ou PDF). O tipo escolhido define
+  a divisão e o recibo:
+
+  | Tipo | Divisão | Recibo |
+  | --- | --- | --- |
+  | Despesas médicas | 50% cada | Judicial |
+  | Despesas escolares (mensalidade, material, uniforme, passeios escolares) | 50% cada | Judicial |
+  | Natação/Academia | 50% cada | Extra |
+  | Van escolar | R$ 200,00 para o pai | Extra |
+  | Roupas | 100% pai | Extra |
+  | Outra despesa combinada | escolhida no lançamento | Extra |
+
 - **Contestar despesa:** a outra parte contesta com motivo; a despesa sai do cálculo e
   nada é apagado.
-- **Registrar pagamento** com comprovante; gera o recibo judicial do mês.
-- **Recibo:** aceite eletrônico da mãe no app (data, hora e código de verificação), PDF
-  para assinar no gov.br e anexo do PDF assinado. Demonstrativo das combinadas à parte.
+- **Registrar pagamento** com comprovante; gera o recibo judicial (pensão + despesas
+  médicas e escolares) e, se houver despesas combinadas, o recibo extra do mês.
+- **Recibos:** aceite eletrônico da mãe no app (data, hora e código de verificação), PDF
+  para assinar no gov.br e anexo do PDF assinado, para cada um dos dois recibos.
 - **Extrato** desde o início do processo, com saldo devedor vencido.
 - **Convites** para a outra parte e para o advogado (só leitura).
 

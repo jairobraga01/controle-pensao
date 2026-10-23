@@ -63,7 +63,7 @@ export default async function Extrato({ searchParams }: { searchParams: Promise<
                 <span>
                   <span style={{ textTransform: "capitalize", fontWeight: 600 }}>{nomeDoMes(m.competencia)}</span>
                   <small>
-                    recibo {formatarReais(m.totalRecibo)} + demonstrativo {formatarReais(m.totalDemonstrativo)}
+                    recibo {formatarReais(m.totalRecibo)} + extra {formatarReais(m.totalDemonstrativo)}
                     {m.pago > 0 && ` · pago ${formatarReais(m.pago)}`}
                   </small>
                 </span>

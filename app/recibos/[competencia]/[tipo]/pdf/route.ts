@@ -1,7 +1,7 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont } from "pdf-lib";
 import { formatarReais } from "@/lib/calculo";
 import { carregarContexto, membroPorPapel } from "@/lib/dados";
-import { textoDoRecibo, type ItemRecibo } from "@/lib/recibo";
+import { TITULO_RECIBO, ehTipoRecibo, textoDoRecibo, type ItemRecibo } from "@/lib/recibo";
 
 const MARGEM = 64;
 const LARGURA = 595.28; // A4
@@ -21,20 +21,26 @@ function quebrar(texto: string, fonte: PDFFont, tamanho: number, largura: number
   return linhas;
 }
 
-export async function GET(_req: Request, { params }: { params: Promise<{ competencia: string }> }) {
-  const { competencia } = await params;
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ competencia: string; tipo: string }> },
+) {
+  const { competencia, tipo } = await params;
+  if (!ehTipoRecibo(tipo)) return new Response("Recibo não encontrado", { status: 404 });
   const ctx = await carregarContexto();
   const { data: recibo } = await ctx.supabase
     .from("recibos")
     .select("*")
     .eq("processo_id", ctx.processo.id)
     .eq("competencia", competencia)
+    .eq("tipo", tipo)
     .maybeSingle();
   if (!recibo) return new Response("Recibo não encontrado", { status: 404 });
 
   const mae = membroPorPapel(ctx, "recebedora");
   const pai = membroPorPapel(ctx, "pagador");
   const paragrafos = textoDoRecibo({
+    tipo,
     recebedora: mae ?? { nome: "[nome da mãe]", qualificacao: null, cpf: null, rg: null, endereco: null },
     pagador: pai ?? { nome: "[nome do pai]", cpf: null, rg: null },
     alimentando: ctx.processo.alimentando_nome,
@@ -44,14 +50,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ compete
   });
 
   const pdf = await PDFDocument.create();
-  pdf.setTitle(`Recibo de pensão ${competencia}`);
+  pdf.setTitle(`Recibo ${tipo} ${competencia}`);
   const pagina = pdf.addPage([LARGURA, ALTURA]);
   const normal = await pdf.embedFont(StandardFonts.TimesRoman);
   const negrito = await pdf.embedFont(StandardFonts.TimesRomanBold);
   const util = LARGURA - 2 * MARGEM;
   let y = ALTURA - MARGEM - 20;
 
-  const titulo = "RECIBO DE PAGAMENTO DE PENSÃO ALIMENTÍCIA";
+  const titulo = TITULO_RECIBO[tipo];
   pagina.drawText(titulo, {
     x: (LARGURA - negrito.widthOfTextAtSize(titulo, 14)) / 2,
     y,
@@ -118,7 +124,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ compete
   return new Response(Buffer.from(bytes), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="recibo-pensao-${competencia}.pdf"`,
+      "Content-Disposition": `attachment; filename="recibo-${tipo}-${competencia}.pdf"`,
     },
   });
 }

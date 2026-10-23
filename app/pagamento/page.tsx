@@ -24,8 +24,8 @@ export default async function Pagamento({
         <section className="cartao">
           <small className="dica" style={{ textTransform: "capitalize" }}>{nomeDoMes(competencia)}</small>
           <span className="num" style={{ fontSize: 28, fontWeight: 700 }}>{formatarReais(sugerido)}</span>
-          <div className="linha suave"><span>Recibo judicial (pensão + decisão)</span><span className="num">{formatarReais(r.totalRecibo)}</span></div>
-          <div className="linha suave"><span>Demonstrativo (combinadas)</span><span className="num">{formatarReais(r.totalDemonstrativo)}</span></div>
+          <div className="linha suave"><span>Recibo judicial (pensão + médicas e escolares)</span><span className="num">{formatarReais(r.totalRecibo)}</span></div>
+          <div className="linha suave"><span>Recibo extra (combinadas)</span><span className="num">{formatarReais(r.totalDemonstrativo)}</span></div>
           <div className="linha suave"><span>Já pago</span><span className="num">{formatarReais(r.pago)}</span></div>
         </section>
         <form action={registrarPagamento} className="cartao">
@@ -46,7 +46,7 @@ export default async function Pagamento({
             Comprovante da transferência (obrigatório)
             <input name="comprovante" type="file" accept="application/pdf,image/*" multiple required />
           </label>
-          <p className="dica">Ao salvar, o app gera o recibo judicial do mês para a mãe confirmar.</p>
+          <p className="dica">Ao salvar, o app gera o recibo judicial e o recibo extra do mês para a mãe confirmar.</p>
           {erro && <p className="erro">{erro}</p>}
           <button className="botao" type="submit">Salvar e gerar recibo</button>
         </form>

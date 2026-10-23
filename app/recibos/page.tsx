@@ -7,9 +7,10 @@ export default async function Recibos() {
   const ctx = await carregarContexto();
   const { data } = await ctx.supabase
     .from("recibos")
-    .select("id, competencia, valor_centavos, confirmado_em")
+    .select("id, competencia, tipo, valor_centavos, confirmado_em")
     .eq("processo_id", ctx.processo.id)
-    .order("competencia", { ascending: false });
+    .order("competencia", { ascending: false })
+    .order("tipo", { ascending: false });
   const recibos = data ?? [];
 
   return (
@@ -21,8 +22,9 @@ export default async function Recibos() {
           <ul className="lista">
             {recibos.map((r) => (
               <li key={r.id}>
-                <Link href={`/recibos/${r.competencia}`} style={{ textTransform: "capitalize" }}>
-                  {nomeDoMes(r.competencia)}
+                <Link href={`/recibos/${r.competencia}/${r.tipo}`}>
+                  <span style={{ textTransform: "capitalize" }}>{nomeDoMes(r.competencia)}</span>
+                  <small>{r.tipo === "judicial" ? "Recibo judicial" : "Recibo extra"}</small>
                 </Link>
                 <span style={{ textAlign: "right" }}>
                   <span className="num">{formatarReais(r.valor_centavos)}</span>

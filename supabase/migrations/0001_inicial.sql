@@ -82,6 +82,7 @@ create table despesas (
   processo_id uuid not null references processos,
   competencia text not null check (competencia ~ '^\d{4}-\d{2}$'),
   descricao text not null,
+  tipo text not null check (tipo in ('medica', 'escolar', 'natacao_academia', 'van', 'roupas', 'outra')),
   valor_centavos integer not null check (valor_centavos > 0),
   data date not null,
   paga_por papel not null check (paga_por in ('pagador', 'recebedora')),
@@ -114,6 +115,8 @@ create table recibos (
   id uuid primary key default gen_random_uuid(),
   processo_id uuid not null references processos,
   competencia text not null check (competencia ~ '^\d{4}-\d{2}$'),
+  -- judicial: pensão + despesas médicas e escolares; extra: despesas combinadas
+  tipo text not null check (tipo in ('judicial', 'extra')),
   valor_centavos integer not null,
   itens jsonb not null, -- [{descricao, valor_centavos}]
   gerado_por uuid not null references auth.users default auth.uid(),
@@ -121,7 +124,7 @@ create table recibos (
   confirmado_em timestamptz,
   confirmado_por uuid references auth.users,
   codigo text unique,
-  unique (processo_id, competencia)
+  unique (processo_id, competencia, tipo)
 );
 
 create table comprovantes (
