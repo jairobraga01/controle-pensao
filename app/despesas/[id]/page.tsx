@@ -56,7 +56,11 @@ export default async function DetalheDespesa({ params }: { params: Promise<{ id:
 
         <section className="cartao">
           <h2>Comprovantes</h2>
-          {comprovantes.length === 0 && <p className="dica">Nenhum comprovante anexado.</p>}
+          {comprovantes.length === 0 && (
+            <p className="dica">
+              {d.importado ? "Importada da planilha antiga, sem comprovante anexado no app." : "Nenhum comprovante anexado."}
+            </p>
+          )}
           <ul className="lista">
             {comprovantes.map((c) => (
               <li key={c.id}>

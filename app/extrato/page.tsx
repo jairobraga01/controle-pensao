@@ -76,6 +76,10 @@ export default async function Extrato({ searchParams }: { searchParams: Promise<
             ))}
           </ul>
         </section>
+        <Link href="/relatorio" className="botao contorno">Relatório para a justiça (PDF)</Link>
+        {ctx.eu.papel === "pagador" && (
+          <Link href="/importar" className="botao contorno">Importar planilha</Link>
+        )}
         {ctx.eu.papel !== "advogado" && (
           <Link href="/convidar" className="botao contorno">Convidar a outra parte ou o advogado</Link>
         )}
