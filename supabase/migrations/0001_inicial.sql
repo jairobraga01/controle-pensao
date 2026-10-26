@@ -2,7 +2,9 @@
 -- Valores monetários em centavos (integer). Competência no formato AAAA-MM.
 -- Nenhuma tabela tem política de DELETE: o histórico vale como prova.
 
-create extension if not exists pgcrypto;
+-- No Supabase as extensões ficam no esquema "extensions".
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
 
 -- Processos e participantes ---------------------------------------------------
 
@@ -36,19 +38,19 @@ create table convites (
   processo_id uuid not null references processos,
   email text not null,
   papel papel not null,
-  token text not null unique default encode(gen_random_bytes(18), 'hex'),
+  token text not null unique default encode(extensions.gen_random_bytes(18), 'hex'),
   criado_por uuid not null references auth.users default auth.uid(),
   criado_em timestamptz not null default now(),
   aceito_em timestamptz
 );
 
 create or replace function eh_membro(p uuid) returns boolean
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select exists (select 1 from membros where processo_id = p and user_id = auth.uid());
 $$;
 
 create or replace function papel_em(p uuid) returns papel
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select papel from membros where processo_id = p and user_id = auth.uid();
 $$;
 
@@ -198,7 +200,7 @@ create or replace function criar_processo(
   p_papel papel, p_nome text,
   p_percentual numeric, p_dia smallint, p_fundamento text
 ) returns uuid
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare novo uuid;
 begin
   if p_papel = 'advogado' then
@@ -214,7 +216,7 @@ begin
 end $$;
 
 create or replace function aceitar_convite(p_token text, p_nome text) returns uuid
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare c convites;
 begin
   select * into c from convites where token = p_token and aceito_em is null for update;
@@ -230,7 +232,7 @@ end $$;
 
 -- A outra parte contesta uma despesa (não apaga; fica registrado).
 create or replace function contestar_despesa(p_despesa uuid, p_motivo text) returns void
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare d despesas;
 begin
   select * into d from despesas where id = p_despesa;
@@ -246,7 +248,7 @@ end $$;
 
 -- Aceite eletrônico do recibo pela recebedora.
 create or replace function confirmar_recibo(p_recibo uuid) returns text
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare r recibos; cod text;
 begin
   select * into r from recibos where id = p_recibo for update;
