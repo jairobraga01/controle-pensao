@@ -28,7 +28,14 @@ instalado no celular ("Adicionar à tela inicial").
 - **Recibos:** aceite eletrônico da mãe no app (data, hora e código de verificação), PDF
   para assinar no gov.br e anexo do PDF assinado, para cada um dos dois recibos.
 - **Extrato** desde o início do processo, com saldo devedor vencido.
-- **Convites** para a outra parte e para o advogado (só leitura).
+- **Convites** para a outra parte e para o advogado (só leitura), com envio do link por
+  WhatsApp ou e-mail.
+- **Importar planilha:** lançamentos antigos em CSV (modelo em **Extrato > Importar
+  planilha**). Se alguma linha tiver erro, nada é importado. Lançamentos importados ficam
+  marcados como "importado", sem comprovante.
+- **Relatório para a justiça:** PDF por período com o resumo mensal (pensão, recibo
+  judicial, recibo extra, pago, saldo e situação dos recibos), as despesas do recibo
+  judicial e os pagamentos.
 
 Nenhum lançamento pode ser apagado pelo app: o histórico vale como prova.
 
@@ -47,7 +54,8 @@ Ficam em [`lib/calculo.ts`](lib/calculo.ts), com testes em
 
 1. Crie um projeto gratuito em [supabase.com](https://supabase.com).
 2. No Supabase, abra **SQL Editor**, cole o conteúdo de
-   [`supabase/migrations/0001_inicial.sql`](supabase/migrations/0001_inicial.sql) e execute.
+   [`supabase/migrations/0001_inicial.sql`](supabase/migrations/0001_inicial.sql) e execute;
+   depois faça o mesmo com os demais arquivos da pasta, em ordem.
 3. Em **Authentication > URL Configuration**, coloque o endereço do app em *Site URL* e
    adicione `https://SEU-ENDERECO/auth/callback` em *Redirect URLs*.
 4. Publique o repositório na [Vercel](https://vercel.com) (plano gratuito) com as variáveis
