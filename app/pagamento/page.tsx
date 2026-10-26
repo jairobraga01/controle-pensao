@@ -24,7 +24,7 @@ export default async function Pagamento({
         <section className="cartao">
           <small className="dica" style={{ textTransform: "capitalize" }}>{nomeDoMes(competencia)}</small>
           <span className="num" style={{ fontSize: 28, fontWeight: 700 }}>{formatarReais(sugerido)}</span>
-          <div className="linha suave"><span>Recibo judicial (pensão + médicas e escolares)</span><span className="num">{formatarReais(r.totalRecibo)}</span></div>
+          <div className="linha suave"><span>Recibo judicial (pensão + médicas, escolares e van)</span><span className="num">{formatarReais(r.totalRecibo)}</span></div>
           <div className="linha suave"><span>Recibo extra (combinadas)</span><span className="num">{formatarReais(r.totalDemonstrativo)}</span></div>
           <div className="linha suave"><span>Já pago</span><span className="num">{formatarReais(r.pago)}</span></div>
         </section>

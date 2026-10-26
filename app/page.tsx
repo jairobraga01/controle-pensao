@@ -46,8 +46,8 @@ export default async function Painel() {
         <section className="cartao">
           <h2>Composição do mês</h2>
           <div className="linha"><span>Pensão ({mes.percentualPensao}% de {formatarReais(mes.salarioMinimo)})</span><span className="num">{formatarReais(mes.pensao)}</span></div>
-          <div className="linha"><span>Despesas médicas e escolares (saldo)</span><span className="num">{formatarReais(mes.despesasDecisao)}</span></div>
-          <div className="linha"><span>Natação, van, roupas e outras</span><span className="num">{formatarReais(mes.despesasCombinadas)}</span></div>
+          <div className="linha"><span>Despesas médicas, escolares e van (saldo)</span><span className="num">{formatarReais(mes.despesasDecisao)}</span></div>
+          <div className="linha"><span>Natação, roupas e outras</span><span className="num">{formatarReais(mes.despesasCombinadas)}</span></div>
           <div className="linha"><span>Já pago</span><span className="num">{formatarReais(mes.pago)}</span></div>
           <div className="divisor" />
           <div className="linha suave"><span>Vai no recibo judicial</span><span className="num">{formatarReais(mes.totalRecibo)}</span></div>

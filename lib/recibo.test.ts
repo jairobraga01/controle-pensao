@@ -24,17 +24,17 @@ const resumo = calcularMes({
 });
 
 describe("recibos do mês", () => {
-  it("judicial: pensão + médicas e escolares", () => {
+  it("judicial: pensão + médicas, escolares e van", () => {
     const itens = itensDoRecibo("judicial", resumo, despesas);
-    expect(itens.map((i) => i.valor_centavos)).toEqual([194520, 77719, 4167, -22670]);
+    expect(itens.map((i) => i.valor_centavos)).toEqual([194520, 77719, 4167, -22670, 20000]);
     expect(itens.reduce((s, i) => s + i.valor_centavos, 0)).toBe(valorDoRecibo("judicial", resumo));
-    expect(valorDoRecibo("judicial", resumo)).toBe(253736);
+    expect(valorDoRecibo("judicial", resumo)).toBe(273736);
   });
 
-  it("extra: natação e van", () => {
+  it("extra: natação", () => {
     const itens = itensDoRecibo("extra", resumo, despesas);
-    expect(itens.map((i) => i.descricao)).toEqual(["Parte do pai: Natação", "Parte do pai: Van"]);
-    expect(valorDoRecibo("extra", resumo)).toBe(29800);
+    expect(itens.map((i) => i.descricao)).toEqual(["Parte do pai: Natação"]);
+    expect(valorDoRecibo("extra", resumo)).toBe(9800);
   });
 
   it("texto do extra não fala em pensão quitada", () => {

@@ -8,17 +8,19 @@ function efeito(tipo: Parameters<typeof regraDoTipo>[0], valor: number, pagaPor:
 }
 
 describe("tipos de despesa", () => {
-  it("médicas e escolares vão no recibo judicial, 50/50", () => {
+  it("médicas, escolares e van vão no recibo judicial", () => {
     expect(regraDoTipo("medica").categoria).toBe("decisao");
     expect(regraDoTipo("escolar").categoria).toBe("decisao");
+    expect(regraDoTipo("van").categoria).toBe("decisao");
+    expect(efeito("van", 60000)).toBe(20000);
     expect(efeito("escolar", 155437)).toBe(77719);
     expect(efeito("medica", 45339, "pagador")).toBe(-22670);
   });
 
-  it("natação, van e roupas vão no recibo extra", () => {
+  it("natação e roupas vão no recibo extra", () => {
     expect(regraDoTipo("natacao_academia").categoria).toBe("combinada");
+    expect(regraDoTipo("roupas").categoria).toBe("combinada");
     expect(efeito("natacao_academia", 19600)).toBe(9800);
-    expect(efeito("van", 60000)).toBe(20000);
     expect(efeito("roupas", 144880)).toBe(144880);
   });
 

@@ -24,7 +24,7 @@ export const TIPOS_DESPESA = {
   van: {
     rotulo: "Van escolar",
     detalhe: "R$ 200,00 para o pai",
-    categoria: "combinada",
+    categoria: "decisao",
     divisao: { tipo: "fixo", valorPagador: 20000 },
   },
   roupas: {
