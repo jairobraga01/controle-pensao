@@ -21,7 +21,7 @@ export interface ItemRecibo {
 
 /**
  * Itens de cada recibo do mês: o judicial leva a pensão e as despesas
- * médicas e escolares; o extra leva as despesas combinadas.
+ * médicas, escolares e a van; o extra leva as despesas combinadas.
  */
 export function itensDoRecibo(tipo: TipoRecibo, resumo: ResumoMes, despesasDoMes: Despesa[]): ItemRecibo[] {
   const itens: ItemRecibo[] = [];

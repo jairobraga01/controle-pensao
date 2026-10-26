@@ -17,14 +17,14 @@ instalado no celular ("Adicionar à tela inicial").
   | Despesas médicas | 50% cada | Judicial |
   | Despesas escolares (mensalidade, material, uniforme, passeios escolares) | 50% cada | Judicial |
   | Natação/Academia | 50% cada | Extra |
-  | Van escolar | R$ 200,00 para o pai | Extra |
+  | Van escolar | R$ 200,00 para o pai | Judicial |
   | Roupas | 100% pai | Extra |
   | Outra despesa combinada | escolhida no lançamento | Extra |
 
 - **Contestar despesa:** a outra parte contesta com motivo; a despesa sai do cálculo e
   nada é apagado.
 - **Registrar pagamento** com comprovante; gera o recibo judicial (pensão + despesas
-  médicas e escolares) e, se houver despesas combinadas, o recibo extra do mês.
+  médicas, escolares e van) e, se houver despesas combinadas, o recibo extra do mês.
 - **Recibos:** aceite eletrônico da mãe no app (data, hora e código de verificação), PDF
   para assinar no gov.br e anexo do PDF assinado, para cada um dos dois recibos.
 - **Extrato** desde o início do processo, com saldo devedor vencido.
