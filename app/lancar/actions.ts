@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { lerReais, type Divisao } from "@/lib/calculo";
 import { arquivosDoForm, salvarComprovantes, validarArquivos } from "@/lib/comprovantes";
 import { carregarContexto } from "@/lib/dados";
+import { lerMes } from "@/lib/mes";
 import { ehTipo, regraDoTipo } from "@/lib/tipos";
 
 function voltarComErro(msg: string): never {
@@ -28,6 +29,8 @@ export async function lancarDespesa(form: FormData) {
   const ctx = await carregarContexto();
   const valor = lerReais(String(form.get("valor") ?? ""));
   if (!valor) voltarComErro("Valor inválido.");
+  const competencia = lerMes(String(form.get("competencia") ?? ""));
+  if (!competencia) voltarComErro("Informe o mês como MM/AAAA, por exemplo 10/2024.");
 
   const tipo = String(form.get("tipo"));
   if (!ehTipo(tipo)) voltarComErro("Escolha o tipo de despesa.");
@@ -44,7 +47,7 @@ export async function lancarDespesa(form: FormData) {
     .from("despesas")
     .insert({
       processo_id: ctx.processo.id,
-      competencia: String(form.get("competencia")),
+      competencia,
       descricao: String(form.get("descricao")).trim(),
       valor_centavos: valor,
       data: String(form.get("data")),

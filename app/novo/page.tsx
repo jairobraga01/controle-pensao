@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { CampoMes } from "@/components/CampoMes";
 import { criarClienteServidor } from "@/lib/supabase/server";
 import { criarProcesso } from "./actions";
 
@@ -38,7 +39,7 @@ export default async function Novo({ searchParams }: { searchParams: Promise<{ e
           </div>
           <label>
             Primeiro mês da pensão
-            <input name="inicio" type="month" required />
+            <CampoMes name="inicio" />
           </label>
           <label>Fundamento (opcional)<input name="fundamento" placeholder="Decisão de dd/mm/aaaa" /></label>
           {erro && <p className="erro">{erro}</p>}

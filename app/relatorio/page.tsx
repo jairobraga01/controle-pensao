@@ -1,3 +1,4 @@
+import { CampoMes } from "@/components/CampoMes";
 import { Menu } from "@/components/Menu";
 import { carregarContexto, competenciaAtual } from "@/lib/dados";
 
@@ -14,8 +15,8 @@ export default async function Relatorio() {
             pagamentos com a origem do comprovante.
           </p>
           <div className="grade2">
-            <label>De<input name="de" type="month" required defaultValue={ctx.processo.inicio_competencia} /></label>
-            <label>Até<input name="ate" type="month" required defaultValue={competenciaAtual()} /></label>
+            <label>De<CampoMes name="de" valor={ctx.processo.inicio_competencia} /></label>
+            <label>Até<CampoMes name="ate" valor={competenciaAtual()} /></label>
           </div>
           <button className="botao" type="submit">Gerar PDF</button>
         </form>
