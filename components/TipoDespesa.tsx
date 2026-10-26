@@ -1,27 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { TIPOS_DESPESA, nomeDoRecibo, type TipoDespesa as Tipo } from "@/lib/tipos";
+import { descreverDivisao, nomeDoRecibo, type TipoCadastro } from "@/lib/tipos";
 
-export function TipoDespesa() {
-  const [tipo, setTipo] = useState<Tipo>("escolar");
-  const t = TIPOS_DESPESA[tipo];
+export function TipoDespesa({ tipos }: { tipos: TipoCadastro[] }) {
+  const [codigo, setCodigo] = useState(tipos.find((t) => t.codigo === "escolar")?.codigo ?? tipos[0]?.codigo ?? "");
+  const t = tipos.find((x) => x.codigo === codigo);
   const [divisao, setDivisao] = useState("metade");
 
   return (
     <>
       <label>
         Tipo de despesa
-        <select name="tipo" value={tipo} onChange={(e) => setTipo(e.target.value as Tipo)}>
-          {Object.entries(TIPOS_DESPESA).map(([id, x]) => (
-            <option key={id} value={id}>{x.rotulo}</option>
+        <select name="tipo" value={codigo} onChange={(e) => setCodigo(e.target.value)}>
+          {tipos.map((x) => (
+            <option key={x.codigo} value={x.codigo}>{x.rotulo}</option>
           ))}
         </select>
-        <span className="dica">
-          {t.detalhe}. Entra no <strong>{nomeDoRecibo(t.categoria).toLowerCase()}</strong>.
-        </span>
+        {t && (
+          <span className="dica">
+            {t.detalhe || descreverDivisao(t.divisao)}. Entra no <strong>{nomeDoRecibo(t.categoria).toLowerCase()}</strong>.
+          </span>
+        )}
       </label>
-      {tipo === "outra" && (
+      {t && !t.divisao && (
         <>
           <label>
             Divisão

@@ -2,13 +2,14 @@ import { redirect } from "next/navigation";
 import { CampoMes } from "@/components/CampoMes";
 import { Menu } from "@/components/Menu";
 import { TipoDespesa } from "@/components/TipoDespesa";
-import { carregarContexto, competenciaAtual, hojeISO } from "@/lib/dados";
+import { carregarContexto, carregarTipos, competenciaAtual, hojeISO } from "@/lib/dados";
 import { lancarDespesa } from "./actions";
 
 export default async function Lancar({ searchParams }: { searchParams: Promise<{ erro?: string }> }) {
   const { erro } = await searchParams;
   const ctx = await carregarContexto();
   if (ctx.eu.papel === "advogado") redirect("/");
+  const tipos = (await carregarTipos(ctx)).filter((t) => t.ativo);
 
   return (
     <div className="app">
@@ -27,7 +28,7 @@ export default async function Lancar({ searchParams }: { searchParams: Promise<{
               <option value="recebedora">Mãe</option>
             </select>
           </label>
-          <TipoDespesa />
+          <TipoDespesa tipos={tipos} />
           <label>
             Mês em que entra no cálculo
             <CampoMes name="competencia" valor={competenciaAtual()} />

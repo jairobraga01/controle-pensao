@@ -9,6 +9,7 @@ import {
   type SalarioMinimo,
 } from "./calculo";
 import { paraDespesa, type LinhaDespesa, type LinhaPagamento } from "./dados-tipos";
+import { TIPOS_PADRAO, paraTipo, type LinhaTipo, type TipoCadastro } from "./tipos";
 import { criarClienteServidor } from "./supabase/server";
 
 export { paraDespesa, type LinhaDespesa, type LinhaPagamento };
@@ -141,6 +142,17 @@ export async function carregarExtrato(ctx: Contexto) {
     .map((c) => resumir(ctx, c, despesas, pagamentos))
     .reverse();
   return { meses, despesas, pagamentos };
+}
+
+/** Tipos de despesa do processo, na ordem do cadastro (inclui os excluídos). */
+export async function carregarTipos(ctx: Contexto): Promise<TipoCadastro[]> {
+  const { data } = await ctx.supabase
+    .from("tipos_despesa")
+    .select("codigo, rotulo, detalhe, categoria, divisao_tipo, divisao_responsavel, divisao_valor_pagador, ativo")
+    .eq("processo_id", ctx.processo.id)
+    .order("ordem")
+    .order("rotulo");
+  return data?.length ? (data as LinhaTipo[]).map(paraTipo) : TIPOS_PADRAO;
 }
 
 export function membroPorPapel(ctx: Contexto, papel: Papel): Membro | undefined {

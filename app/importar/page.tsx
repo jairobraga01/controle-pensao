@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { Menu } from "@/components/Menu";
-import { carregarContexto } from "@/lib/dados";
+import { carregarContexto, carregarTipos } from "@/lib/dados";
 import { importar } from "./actions";
 
 export default async function Importar({
@@ -11,6 +11,7 @@ export default async function Importar({
   const sp = await searchParams;
   const ctx = await carregarContexto();
   if (ctx.eu.papel !== "pagador") redirect("/");
+  const tipos = (await carregarTipos(ctx)).filter((t) => t.ativo);
   const erros = sp.erros ? (JSON.parse(sp.erros) as string[]) : [];
 
   return (
@@ -32,8 +33,9 @@ export default async function Importar({
           </p>
           <a className="botao contorno" href="/importar/modelo">Baixar modelo</a>
           <p className="dica">
-            Tipos: medica, escolar, natacao_academia, van, roupas ou outra. Para “outra”, a coluna
-            divisao recebe metade, pai, mae ou fixo (com valor_fixo). pago_por: pai ou mae.
+            Na coluna tipo, use o código: {tipos.map((t) => `${t.codigo} (${t.rotulo})`).join(", ")}. Nos
+            tipos sem divisão própria, a coluna divisao recebe metade, pai, mae ou fixo (com
+            valor_fixo). pago_por: pai ou mae.
           </p>
         </section>
         <form action={importar} className="cartao">

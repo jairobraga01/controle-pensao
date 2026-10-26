@@ -3,15 +3,15 @@
 import { redirect } from "next/navigation";
 import { lerReais, type Divisao } from "@/lib/calculo";
 import { arquivosDoForm, salvarComprovantes, validarArquivos } from "@/lib/comprovantes";
-import { carregarContexto } from "@/lib/dados";
+import { carregarContexto, carregarTipos } from "@/lib/dados";
 import { lerMes } from "@/lib/mes";
-import { ehTipo, regraDoTipo } from "@/lib/tipos";
+import { acharTipo, regraDoTipo } from "@/lib/tipos";
 
 function voltarComErro(msg: string): never {
   redirect(`/lancar?erro=${encodeURIComponent(msg)}`);
 }
 
-/** Divisão escolhida à mão, usada só no tipo "outra". */
+/** Divisão escolhida à mão, para tipos sem divisão própria. */
 function divisaoManual(form: FormData): Divisao | null {
   const v = String(form.get("divisao") ?? "");
   if (v === "metade") return { tipo: "metade" };
@@ -32,10 +32,11 @@ export async function lancarDespesa(form: FormData) {
   const competencia = lerMes(String(form.get("competencia") ?? ""));
   if (!competencia) voltarComErro("Informe o mês como MM/AAAA, por exemplo 10/2024.");
 
-  const tipo = String(form.get("tipo"));
-  if (!ehTipo(tipo)) voltarComErro("Escolha o tipo de despesa.");
+  const tipos = (await carregarTipos(ctx)).filter((t) => t.ativo);
+  const tipo = acharTipo(tipos, String(form.get("tipo")));
+  if (!tipo) voltarComErro("Escolha o tipo de despesa.");
   const manual = divisaoManual(form);
-  if (tipo === "outra" && !manual) voltarComErro("Escolha a divisão da despesa.");
+  if (!tipo.divisao && !manual) voltarComErro("Escolha a divisão da despesa.");
   const regra = regraDoTipo(tipo, manual ?? undefined);
   const d = regra.divisao;
 
@@ -52,7 +53,7 @@ export async function lancarDespesa(form: FormData) {
       valor_centavos: valor,
       data: String(form.get("data")),
       paga_por: String(form.get("paga_por")),
-      tipo,
+      tipo: tipo.codigo,
       categoria: regra.categoria,
       divisao_tipo: d.tipo,
       divisao_responsavel: d.tipo === "integral" ? d.responsavel : null,

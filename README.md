@@ -10,7 +10,8 @@ instalado no celular ("Adicionar à tela inicial").
   decisão, despesas combinadas, quanto já foi pago e o que falta, com status
   aberto / em atraso / quitado.
 - **Lançar despesa** com comprovante obrigatório (foto ou PDF). O tipo escolhido define
-  a divisão e o recibo:
+  a divisão e o recibo. Todo processo começa com os tipos abaixo, que podem ser alterados,
+  excluídos ou complementados na aba **Pensão**:
 
   | Tipo | Divisão | Recibo |
   | --- | --- | --- |
@@ -21,6 +22,8 @@ instalado no celular ("Adicionar à tela inicial").
   | Roupas | 100% pai | Extra |
   | Outra despesa combinada | escolhida no lançamento | Extra |
 
+- **Dados da Pensão:** editar processo, vara, local do recibo, percentual, vencimento e
+  primeiro mês; cadastrar os tipos de despesa; excluir a pensão enquanto nada foi lançado.
 - **Contestar despesa:** a outra parte contesta com motivo; a despesa sai do cálculo e
   nada é apagado.
 - **Registrar pagamento** com comprovante; gera o recibo judicial (pensão + despesas
