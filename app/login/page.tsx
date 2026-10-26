@@ -1,3 +1,4 @@
+import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { criarConta, entrar, receberLink } from "./actions";
 
 export default async function Login({
@@ -25,7 +26,7 @@ export default async function Login({
             <input name="senha" type="password" required minLength={8} autoComplete="current-password" />
           </label>
           {erro && <p className="erro">{erro}</p>}
-          <button className="botao" type="submit">Entrar</button>
+          <BotaoEnviar>Entrar</BotaoEnviar>
           <button className="botao contorno" type="submit" formAction={criarConta}>
             Criar conta com este e-mail e senha
           </button>

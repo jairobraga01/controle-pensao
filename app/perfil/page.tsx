@@ -1,3 +1,4 @@
+import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { Menu } from "@/components/Menu";
 import { carregarContexto } from "@/lib/dados";
 import { salvarPerfil, trocarSenha } from "./actions";
@@ -24,7 +25,7 @@ export default async function Perfil({ searchParams }: { searchParams: Promise<{
           {e.papel === "recebedora" && (
             <label>Endereço<textarea name="endereco" defaultValue={e.endereco ?? ""} /></label>
           )}
-          <button className="botao" type="submit">Salvar</button>
+          <BotaoEnviar>Salvar</BotaoEnviar>
         </form>
         <form action={trocarSenha} className="cartao">
           <label>

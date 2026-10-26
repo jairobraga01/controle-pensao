@@ -1,3 +1,4 @@
+import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { aceitar } from "./actions";
 
 export default async function Convite({
@@ -18,7 +19,7 @@ export default async function Convite({
           <input type="hidden" name="token" value={token} />
           <label>Seu nome completo<input name="nome" required /></label>
           {erro && <p className="erro">{erro}</p>}
-          <button className="botao" type="submit">Aceitar</button>
+          <BotaoEnviar>Aceitar</BotaoEnviar>
         </form>
       </main>
     </div>

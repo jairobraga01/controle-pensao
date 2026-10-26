@@ -1,3 +1,4 @@
+import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { redirect } from "next/navigation";
 import { Menu } from "@/components/Menu";
 import { carregarContexto, carregarTipos } from "@/lib/dados";
@@ -52,7 +53,7 @@ export default async function Importar({
               {erros.length > 30 && <p>… e mais {erros.length - 30}.</p>}
             </div>
           )}
-          <button className="botao" type="submit">Importar</button>
+          <BotaoEnviar>Importar</BotaoEnviar>
         </form>
       </main>
       <Menu podeLancar />

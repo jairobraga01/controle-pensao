@@ -1,3 +1,4 @@
+import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { redirect } from "next/navigation";
 import { Menu } from "@/components/Menu";
 import { carregarContexto } from "@/lib/dados";
@@ -45,7 +46,7 @@ export default async function Convidar({ searchParams }: { searchParams: Promise
             </select>
           </label>
           {erro && <p className="erro">{erro}</p>}
-          <button className="botao" type="submit">Criar convite</button>
+          <BotaoEnviar>Criar convite</BotaoEnviar>
         </form>
         {!!pendentes?.length && (
           <section className="cartao">

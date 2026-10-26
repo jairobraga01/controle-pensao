@@ -1,3 +1,4 @@
+import { BotaoEnviar } from "@/components/BotaoEnviar";
 import Link from "next/link";
 import { CampoMes } from "@/components/CampoMes";
 import { Menu } from "@/components/Menu";
@@ -91,7 +92,7 @@ export default async function DadosDaPensao({
             </div>
             <label>Primeiro mês da pensão<CampoMes name="inicio" valor={p.inicio_competencia} /></label>
             <label>Fundamento (opcional)<input name="fundamento" defaultValue={regra?.fundamento ?? ""} placeholder="Decisão de dd/mm/aaaa" /></label>
-            {!leitura && <button className="botao" type="submit">Salvar dados da pensão</button>}
+            {!leitura && <BotaoEnviar>Salvar dados da pensão</BotaoEnviar>}
           </fieldset>
         </form>
 
@@ -112,7 +113,7 @@ export default async function DadosDaPensao({
                   <form action={salvarTipo} style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
                     <input type="hidden" name="codigo" value={t.codigo} />
                     <CamposDoTipo t={t} desabilitado={leitura} />
-                    {!leitura && <button className="botao" type="submit">Salvar tipo</button>}
+                    {!leitura && <BotaoEnviar>Salvar tipo</BotaoEnviar>}
                   </form>
                   {!leitura && (
                     <form action={ativarTipo} style={{ marginTop: 8 }}>
@@ -151,7 +152,7 @@ export default async function DadosDaPensao({
             <summary style={{ cursor: "pointer", fontWeight: 600 }}>Novo tipo de despesa</summary>
             <form action={criarTipo} style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
               <CamposDoTipo desabilitado={false} />
-              <button className="botao" type="submit">Criar tipo</button>
+              <BotaoEnviar>Criar tipo</BotaoEnviar>
             </form>
           </details>
         )}
