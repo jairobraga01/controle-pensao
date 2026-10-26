@@ -2,6 +2,7 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf
 import { type NextRequest } from "next/server";
 import { formatarReais, nomeDoMes } from "@/lib/calculo";
 import { carregarContexto, carregarExtrato, membroPorPapel } from "@/lib/dados";
+import { lerMes } from "@/lib/mes";
 import { montarRelatorio, type ReciboResumo } from "@/lib/relatorio";
 
 const LARGURA = 595.28;
@@ -70,9 +71,9 @@ class Escritor {
 }
 
 export async function GET(req: NextRequest) {
-  const de = req.nextUrl.searchParams.get("de") ?? "";
-  const ate = req.nextUrl.searchParams.get("ate") ?? "";
-  if (!/^\d{4}-\d{2}$/.test(de) || !/^\d{4}-\d{2}$/.test(ate) || de > ate) {
+  const de = lerMes(req.nextUrl.searchParams.get("de") ?? "");
+  const ate = lerMes(req.nextUrl.searchParams.get("ate") ?? "");
+  if (!de || !ate || de > ate) {
     return new Response("Período inválido", { status: 400 });
   }
   const ctx = await carregarContexto();

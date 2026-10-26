@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { CampoMes } from "@/components/CampoMes";
 import { Menu } from "@/components/Menu";
 import { TipoDespesa } from "@/components/TipoDespesa";
 import { carregarContexto, competenciaAtual, hojeISO } from "@/lib/dados";
@@ -29,7 +30,7 @@ export default async function Lancar({ searchParams }: { searchParams: Promise<{
           <TipoDespesa />
           <label>
             Mês em que entra no cálculo
-            <input name="competencia" type="month" required defaultValue={competenciaAtual()} />
+            <CampoMes name="competencia" valor={competenciaAtual()} />
           </label>
           <label>
             Comprovante (obrigatório)
