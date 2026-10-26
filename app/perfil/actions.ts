@@ -23,3 +23,11 @@ export async function salvarPerfil(form: FormData) {
   if (error) throw new Error(error.message);
   redirect("/perfil?ok=1");
 }
+
+export async function trocarSenha(form: FormData) {
+  const ctx = await carregarContexto();
+  const senha = String(form.get("senha") ?? "");
+  if (senha.length < 8) redirect("/perfil?erro=senha");
+  const { error } = await ctx.supabase.auth.updateUser({ password: senha });
+  redirect(error ? "/perfil?erro=senha" : "/perfil?ok=senha");
+}
