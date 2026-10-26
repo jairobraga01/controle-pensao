@@ -13,6 +13,13 @@ function voltarAoLogin(form: FormData, params: Record<string, string>): never {
   redirect(`/login?${q}`);
 }
 
+const SEM_CONEXAO = "O app não conseguiu falar com o servidor. Confira a configuração (variáveis do Supabase na Vercel).";
+
+/** Falha de rede ou de configuração, e não de senha ou e-mail. */
+function semConexao(error: { name?: string; status?: number }) {
+  return error.name === "AuthRetryableFetchError" || !error.status;
+}
+
 function credenciais(form: FormData) {
   return {
     email: String(form.get("email") ?? "").trim(),
@@ -24,8 +31,9 @@ export async function entrar(form: FormData) {
   const supabase = await criarClienteServidor();
   const { error } = await supabase.auth.signInWithPassword(credenciais(form));
   if (error) {
-    const msg =
-      error.code === "email_not_confirmed"
+    const msg = semConexao(error)
+      ? SEM_CONEXAO
+      : error.code === "email_not_confirmed"
         ? "Confirme o seu e-mail pelo link que enviamos antes de entrar."
         : "E-mail ou senha incorretos.";
     voltarAoLogin(form, { erro: msg });
@@ -44,8 +52,9 @@ export async function criarConta(form: FormData) {
     options: { emailRedirectTo: `${site}/auth/callback?voltar=${encodeURIComponent(destino(form))}` },
   });
   if (error) {
-    const msg =
-      error.code === "user_already_exists"
+    const msg = semConexao(error)
+      ? SEM_CONEXAO
+      : error.code === "user_already_exists"
         ? "Já existe uma conta com esse e-mail. Use Entrar."
         : "Não foi possível criar a conta. Tente de novo.";
     voltarAoLogin(form, { erro: msg });
@@ -66,7 +75,7 @@ export async function receberLink(form: FormData) {
       emailRedirectTo: `${site}/auth/callback?voltar=${encodeURIComponent("/perfil")}`,
     },
   });
-  if (error) voltarAoLogin(form, { erro: "Não foi possível enviar o link. Tente de novo." });
+  if (error) voltarAoLogin(form, { erro: semConexao(error) ? SEM_CONEXAO : "Não foi possível enviar o link. Tente de novo." });
   voltarAoLogin(form, { enviado: "1" });
 }
 
