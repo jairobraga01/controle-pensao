@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { calcularMes, type Despesa } from "./calculo";
 import { itensDoRecibo, textoDoRecibo, valorDoRecibo } from "./recibo";
 import { REGRAS_DECISAO, SALARIOS_MINIMOS } from "./tabelas";
-import { regraDoTipo, type TipoDespesa } from "./tipos";
+import { TIPOS_PADRAO, acharTipo, regraDoTipo } from "./tipos";
 
-function d(tipo: TipoDespesa, descricao: string, valor: number, pagaPor: Despesa["pagaPor"] = "recebedora"): Despesa {
-  return { id: descricao, descricao, valor, data: "2026-10-05", pagaPor, ...regraDoTipo(tipo) };
+function d(tipo: string, descricao: string, valor: number, pagaPor: Despesa["pagaPor"] = "recebedora"): Despesa {
+  return { id: descricao, descricao, valor, data: "2026-10-05", pagaPor, ...regraDoTipo(acharTipo(TIPOS_PADRAO, tipo)!) };
 }
 
 const despesas = [

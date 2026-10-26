@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { Menu } from "@/components/Menu";
 import { formatarReais, nomeDoMes, statusDoMes } from "@/lib/calculo";
-import { carregarContexto, carregarExtrato, competenciaAtual, hojeISO } from "@/lib/dados";
+import { carregarContexto, carregarExtrato, carregarTipos, competenciaAtual, hojeISO } from "@/lib/dados";
 import { sair } from "./login/actions";
-import { TIPOS_DESPESA } from "@/lib/tipos";
+import { rotuloDoTipo } from "@/lib/tipos";
 
 const ROTULO = { quitado: "Quitado", aberto: "Aberto", atrasado: "Em atraso" } as const;
 
 export default async function Painel() {
   const ctx = await carregarContexto();
-  const { meses, despesas } = await carregarExtrato(ctx);
+  const [{ meses, despesas }, tipos] = await Promise.all([carregarExtrato(ctx), carregarTipos(ctx)]);
   const atual = competenciaAtual();
   const mes = meses.find((m) => m.competencia === atual) ?? meses[0];
   const status = statusDoMes(mes, hojeISO());
@@ -79,7 +79,7 @@ export default async function Painel() {
                     {d.descricao}
                     <small>
                       {d.paga_por === "pagador" ? "Pago pelo pai" : "Pago pela mãe"} ·{" "}
-                      {TIPOS_DESPESA[d.tipo].rotulo}
+                      {rotuloDoTipo(tipos, d.tipo)}
                       {d.contestada_em ? " · contestada" : ""}
                     </small>
                   </Link>

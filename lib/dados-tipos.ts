@@ -1,13 +1,12 @@
 // Formato das linhas do banco, sem dependências de servidor (usado também nos testes).
 
 import type { Despesa, Parte } from "./calculo";
-import type { TipoDespesa } from "./tipos";
 
 export interface LinhaDespesa {
   id: string;
   competencia: string;
   descricao: string;
-  tipo: TipoDespesa;
+  tipo: string;
   valor_centavos: number;
   data: string;
   paga_por: Parte;

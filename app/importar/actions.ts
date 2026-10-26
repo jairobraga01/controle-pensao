@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { carregarContexto } from "@/lib/dados";
+import { carregarContexto, carregarTipos } from "@/lib/dados";
 import { lerCsv } from "@/lib/importacao";
 
 export async function importar(form: FormData) {
@@ -11,7 +11,7 @@ export async function importar(form: FormData) {
   if (!(arquivo instanceof File) || arquivo.size === 0) {
     redirect(`/importar?erros=${encodeURIComponent(JSON.stringify(["Escolha um arquivo CSV."]))}`);
   }
-  const { despesas, pagamentos, erros } = lerCsv(await arquivo.text());
+  const { despesas, pagamentos, erros } = lerCsv(await arquivo.text(), await carregarTipos(ctx));
   if (erros.length) redirect(`/importar?erros=${encodeURIComponent(JSON.stringify(erros.slice(0, 50)))}`);
 
   const base = { processo_id: ctx.processo.id, importado: true };

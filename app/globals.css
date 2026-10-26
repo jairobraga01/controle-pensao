@@ -59,7 +59,7 @@ input[type="checkbox"], input[type="radio"] { width: 20px; min-height: 20px; acc
 .link { background: none; border: 0; padding: 0; font: inherit; color: var(--marca); text-decoration: underline; cursor: pointer; }
 
 .menu { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--linha); }
-.menu ul { max-width: 480px; margin: 0 auto; padding: 6px 8px 14px; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.menu ul { max-width: 480px; margin: 0 auto; padding: 6px 8px 14px; list-style: none; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
 .menu a { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0; font-size: 11px; color: var(--suave); text-decoration: none; }
 .menu a[aria-current="page"] { color: var(--marca); font-weight: 600; }
 

@@ -2,7 +2,7 @@
 // Excel e o LibreOffice salvam em português).
 
 import { lerReais, type Divisao, type Parte } from "./calculo";
-import { ehTipo, regraDoTipo, type TipoDespesa } from "./tipos";
+import { TIPOS_PADRAO, acharTipo, regraDoTipo, type TipoCadastro } from "./tipos";
 
 export const CABECALHO = [
   "lancamento", "competencia", "data", "descricao", "tipo", "valor", "pago_por", "divisao", "valor_fixo", "forma",
@@ -26,7 +26,7 @@ export interface DespesaImportada {
   competencia: string;
   data: string;
   descricao: string;
-  tipo: TipoDespesa;
+  tipo: string;
   valor: number;
   pagaPor: Parte;
   divisao: Divisao;
@@ -95,7 +95,8 @@ function dividir(linha: string): string[] {
   return out;
 }
 
-export function lerCsv(texto: string): ResultadoImportacao {
+/** Lê o CSV; o tipo de cada despesa deve ser o código de um tipo ativo do cadastro. */
+export function lerCsv(texto: string, tipos: TipoCadastro[] = TIPOS_PADRAO): ResultadoImportacao {
   const res: ResultadoImportacao = { despesas: [], pagamentos: [], erros: [] };
   const linhas = texto.replace(/^﻿/, "").split(/\r?\n/);
   const cab = dividir(linhas[0] ?? "").map((c) => c.toLowerCase());
@@ -126,16 +127,17 @@ export function lerCsv(texto: string): ResultadoImportacao {
     }
     if (c.lancamento.toLowerCase() !== "despesa") { erro(`lançamento deve ser "despesa" ou "pagamento".`); continue; }
     if (!c.descricao) { erro("descrição vazia."); continue; }
-    if (!ehTipo(c.tipo)) { erro(`tipo "${c.tipo}" inválido.`); continue; }
+    const tipo = acharTipo(tipos.filter((t) => t.ativo), c.tipo);
+    if (!tipo) { erro(`tipo "${c.tipo}" inválido. Use um código da aba Dados da Pensão.`); continue; }
     const pagaPor = lerParte(c.pago_por);
     if (!pagaPor) { erro(`pago_por deve ser "pai" ou "mae".`); continue; }
     let manual: Divisao | undefined;
-    if (c.tipo === "outra") {
+    if (!tipo.divisao) {
       const d = lerDivisao(c.divisao, c.valor_fixo);
-      if (!d) { erro(`para o tipo "outra", informe a divisão (metade, pai, mae ou fixo + valor_fixo).`); continue; }
+      if (!d) { erro(`para o tipo "${c.tipo}", informe a divisão (metade, pai, mae ou fixo + valor_fixo).`); continue; }
       manual = d;
     }
-    const regra = regraDoTipo(c.tipo, manual);
+    const regra = regraDoTipo(tipo, manual);
     res.despesas.push({
       linha: n, competencia: c.competencia, data, descricao: c.descricao, tipo: c.tipo,
       valor, pagaPor, ...regra,
