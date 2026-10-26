@@ -57,11 +57,13 @@ Ficam em [`lib/calculo.ts`](lib/calculo.ts), com testes em
    [`supabase/migrations/0001_inicial.sql`](supabase/migrations/0001_inicial.sql) e execute;
    depois faça o mesmo com os demais arquivos da pasta, em ordem.
 3. Em **Authentication > URL Configuration**, coloque o endereço do app em *Site URL* e
-   adicione `https://SEU-ENDERECO/auth/callback` em *Redirect URLs*.
+   adicione `https://SEU-ENDERECO/auth/callback` em *Redirect URLs*. O login é por e-mail e
+   senha; se quiser que a conta entre direto, sem e-mail de confirmação, desligue
+   *Confirm email* em **Authentication > Sign In / Providers > Email**.
 4. Publique o repositório na [Vercel](https://vercel.com) (plano gratuito) com as variáveis
    de [`.env.example`](.env.example), usando os valores de **Project Settings > API** do
    Supabase.
-5. Abra o app, entre com seu e-mail, cadastre o processo e convide a outra parte em
+5. Abra o app, crie sua conta com e-mail e senha, cadastre o processo e convide a outra parte em
    **Extrato > Convidar**.
 
 ## Desenvolvimento
