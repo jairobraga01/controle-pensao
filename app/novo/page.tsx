@@ -1,3 +1,4 @@
+import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { redirect } from "next/navigation";
 import { CampoMes } from "@/components/CampoMes";
 import { criarClienteServidor } from "@/lib/supabase/server";
@@ -43,7 +44,7 @@ export default async function Novo({ searchParams }: { searchParams: Promise<{ e
           </label>
           <label>Fundamento (opcional)<input name="fundamento" placeholder="Decisão de dd/mm/aaaa" /></label>
           {erro && <p className="erro">{erro}</p>}
-          <button className="botao" type="submit">Cadastrar</button>
+          <BotaoEnviar>Cadastrar</BotaoEnviar>
         </form>
       </main>
     </div>

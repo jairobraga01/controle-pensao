@@ -1,3 +1,4 @@
+import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { redirect } from "next/navigation";
 import { Menu } from "@/components/Menu";
 import { formatarReais, nomeDoMes } from "@/lib/calculo";
@@ -48,7 +49,7 @@ export default async function Pagamento({
           </label>
           <p className="dica">Ao salvar, o app gera o recibo judicial e o recibo extra do mês para a mãe confirmar.</p>
           {erro && <p className="erro">{erro}</p>}
-          <button className="botao" type="submit">Salvar e gerar recibo</button>
+          <BotaoEnviar>Salvar e gerar recibo</BotaoEnviar>
         </form>
       </main>
       <Menu podeLancar />

@@ -1,3 +1,4 @@
+import { BotaoEnviar } from "@/components/BotaoEnviar";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Menu } from "@/components/Menu";
@@ -89,7 +90,7 @@ export default async function Recibo({
           <form action={confirmar}>
             <input type="hidden" name="id" value={recibo.id} />
             <input type="hidden" name="volta" value={base} />
-            <button className="botao" type="submit">Confirmar recebimento</button>
+            <BotaoEnviar>Confirmar recebimento</BotaoEnviar>
           </form>
         )}
 

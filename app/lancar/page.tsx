@@ -1,3 +1,4 @@
+import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { redirect } from "next/navigation";
 import { CampoMes } from "@/components/CampoMes";
 import { Menu } from "@/components/Menu";
@@ -38,7 +39,7 @@ export default async function Lancar({ searchParams }: { searchParams: Promise<{
             <input name="comprovante" type="file" accept="application/pdf,image/*" multiple required />
           </label>
           {erro && <p className="erro">{erro}</p>}
-          <button className="botao" type="submit">Salvar despesa</button>
+          <BotaoEnviar>Salvar despesa</BotaoEnviar>
         </form>
       </main>
       <Menu podeLancar />
