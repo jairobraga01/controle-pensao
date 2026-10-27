@@ -24,11 +24,17 @@ const SEM_PERMISSAO =
 export async function alterarDespesa(form: FormData) {
   const id = String(form.get("id"));
   const pagina = `/despesas/${id}`;
+  const tela = `/lancar?editar=${id}`;
   const ctx = await carregarContexto();
-  const campos = await lerCamposDespesa(form, ctx, pagina);
+  const campos = await lerCamposDespesa(form, ctx, tela);
   const { data, error } = await ctx.supabase.from("despesas").update(campos).eq("id", id).select("id");
-  if (error) voltarComErro(pagina, error.message);
-  if (!data?.length) voltarComErro(pagina, SEM_PERMISSAO);
+  if (error) voltarComErro(tela, error.message);
+  if (!data?.length) voltarComErro(tela, SEM_PERMISSAO);
+  try {
+    await registrarEnviados(ctx, enviadosDoForm(form, ctx.processo.id), { despesa_id: id });
+  } catch (e) {
+    voltarComErro(pagina, `Despesa alterada, mas o comprovante falhou: ${(e as Error).message}`);
+  }
   revalidatePath(pagina);
   redirect(`${pagina}?ok=alterada`);
 }
