@@ -14,6 +14,7 @@ import {
 } from "@/lib/dados";
 import { mesParaTela } from "@/lib/mes";
 import { blocosDoMes, type Bloco } from "@/lib/planilha";
+import { rotuloDoTipo } from "@/lib/tipos";
 import { incluirPendente } from "./actions";
 import { sair } from "./login/actions";
 
@@ -36,6 +37,7 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
   const contestadas = despesas.filter((d) => d.contestada_em && d.competencia === mes.competencia);
   const podeLancar = ctx.eu.papel !== "advogado";
   const tipos = todosTipos.filter((t) => t.ativo);
+  const ultimas = despesas.slice(0, 5);
   const voltar = `/?mes=${mes.competencia}`;
   const hoje = hojeISO();
 
@@ -121,6 +123,17 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
           )}
         </section>
 
+        <section className="cartao">
+          <h2>Composição do mês</h2>
+          <div className="linha"><span>Pensão ({mes.percentualPensao}% de {formatarReais(mes.salarioMinimo)})</span><span className="num">{formatarReais(mes.pensao)}</span></div>
+          <div className="linha"><span>Despesas médicas, escolares e van (saldo)</span><span className="num">{formatarReais(mes.despesasDecisao)}</span></div>
+          <div className="linha"><span>Natação, roupas e outras</span><span className="num">{formatarReais(mes.despesasCombinadas)}</span></div>
+          <div className="linha"><span>Já pago</span><span className="num">{formatarReais(mes.pago)}</span></div>
+          <div className="divisor" />
+          <div className="linha suave"><span>Vai no recibo judicial</span><span className="num">{formatarReais(mes.totalRecibo)}</span></div>
+          <div className="linha suave"><span>Vai no recibo extra</span><span className="num">{formatarReais(mes.totalDemonstrativo)}</span></div>
+        </section>
+
         {devedorAnterior > 0 && (
           <Link href="/extrato?filtro=abertos" className="alerta" style={{ textDecoration: "none" }}>
             <strong>Saldo de meses anteriores: {formatarReais(devedorAnterior)}</strong>
@@ -150,6 +163,30 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
 
         <TabelaBloco bloco={blocos.pendentes} titulo="Outras Despesas Pendentes" totalRotulo="Total" />
         <p className="dica">As pendentes não entram no cálculo nem nos recibos até serem incluídas num mês.</p>
+
+        <section className="cartao">
+          <div className="linha"><h2>Últimos lançamentos</h2><Link href="/extrato" style={{ fontSize: 13, fontWeight: 600 }}>Ver extrato</Link></div>
+          {ultimas.length === 0 ? (
+            <p className="dica">Nenhuma despesa lançada ainda.</p>
+          ) : (
+            <ul className="lista">
+              {ultimas.map((d) => (
+                <li key={d.id}>
+                  <Link href={`/despesas/${d.id}`} style={{ color: "inherit", textDecoration: "none" }}>
+                    {d.descricao}
+                    <small>
+                      {d.paga_por === "pagador" ? `Pago por ${nomes.pagador}` : `Pago por ${nomes.recebedora}`} ·{" "}
+                      {rotuloDoTipo(todosTipos, d.tipo)}
+                      {d.pendente ? " · pendente" : ""}
+                      {d.contestada_em ? " · contestada" : ""}
+                    </small>
+                  </Link>
+                  <span className="num">{formatarReais(d.valor_centavos)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </main>
       <Menu podeLancar={podeLancar} />
     </div>
