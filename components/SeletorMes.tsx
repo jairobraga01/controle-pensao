@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 import { nomeDoMes } from "@/lib/calculo";
 
 /** Escolhe o mês de competência da tela inicial; os meses vêm do mais recente ao mais antigo. */
-export function SeletorMes({ meses, atual }: { meses: string[]; atual: string }) {
+export function SeletorMes({ meses, atual, base = "/" }: { meses: string[]; atual: string; base?: string }) {
   const router = useRouter();
   const i = meses.indexOf(atual);
-  const ir = (m: string | undefined) => m && router.push(`/?mes=${m}`);
+  const ir = (m: string | undefined) => m && router.push(`${base}?mes=${m}`);
 
   return (
     <div className="seletor-mes">

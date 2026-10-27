@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { FormDespesa } from "@/components/FormDespesa";
 import { Menu } from "@/components/Menu";
 import { SeletorMes } from "@/components/SeletorMes";
 import { formatarReais, statusDoMes, type Parte } from "@/lib/calculo";
@@ -11,10 +10,8 @@ import {
   hojeISO,
   membroPorPapel,
 } from "@/lib/dados";
-import { mesParaTela } from "@/lib/mes";
-import { blocosDoMes, type Bloco } from "@/lib/planilha";
+import { blocosDoMes } from "@/lib/planilha";
 import { rotuloDoTipo } from "@/lib/tipos";
-import { incluirPendente } from "./actions";
 import { sair } from "./login/actions";
 
 const ROTULO = { quitado: "Quitado", aberto: "Aberto", atrasado: "Em atraso" } as const;
@@ -35,66 +32,12 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
   const devedorAnterior = anteriores.reduce((s, m) => s + m.saldo, 0);
   const contestadas = despesas.filter((d) => d.contestada_em && d.competencia === mes.competencia);
   const podeLancar = ctx.eu.papel !== "advogado";
-  const tipos = todosTipos.filter((t) => t.ativo);
   const ultimas = despesas.slice(0, 5);
-  const voltar = `/?mes=${mes.competencia}`;
-  const hoje = hojeISO();
+  const discriminacao = `/despesas?mes=${mes.competencia}`;
 
   const primeiro = (p: Parte, padrao: string) => membroPorPapel(ctx, p)?.nome.split(" ")[0] || padrao;
   const nomes: Record<Parte, string> = { recebedora: primeiro("recebedora", "Mãe"), pagador: primeiro("pagador", "Pai") };
-  const blocos = Object.fromEntries(blocosDoMes(mes.competencia, despesas).map((b) => [b.chave, b])) as Record<Bloco["chave"], Bloco>;
-  const pendentes = blocos.pendentes;
-
-  // Um bloco da planilha (aba 10-2026), aberto dentro da Composição do mês.
-  function TabelaBloco({ bloco, titulo }: { bloco: Bloco; titulo: string }) {
-    const tiposDoBloco = bloco.categoria ? tipos.filter((t) => t.categoria === bloco.categoria) : tipos;
-    const ehPendente = bloco.chave === "pendentes";
-    return (
-      <div className="planilha">
-        <div className="pl-linha pl-cab">
-          <span>{titulo}</span>
-          <span>Valor</span>
-          <span>Valor/2</span>
-        </div>
-        {bloco.itens.map((i) => (
-          <div key={i.id}>
-            <Link href={`/despesas/${i.id}`} className="pl-linha">
-              <span>{dataCurta(i.data)} - {i.descricao}</span>
-              <span className="num">{formatarReais(i.valor)}</span>
-              <span className={`num${i.parte < 0 ? " negativo" : ""}`}>{formatarReais(i.parte)}</span>
-            </Link>
-            {ehPendente && podeLancar && (
-              <form action={incluirPendente} className="pl-acao">
-                <input type="hidden" name="id" value={i.id} />
-                <input type="hidden" name="mes" value={mes.competencia} />
-                <button className="link">Incluir no cálculo de {mesParaTela(mes.competencia)}</button>
-              </form>
-            )}
-          </div>
-        ))}
-        {bloco.itens.length === 0 && <p className="dica pl-vazio">Nenhuma despesa.</p>}
-        <div className="pl-linha pl-total">
-          <span>Total</span>
-          <span className="num">{formatarReais(bloco.totalValor)}</span>
-          <span className={`num${bloco.totalParte < 0 ? " negativo" : ""}`}>{formatarReais(bloco.totalParte)}</span>
-        </div>
-        {podeLancar && tiposDoBloco.length > 0 && (
-          <details className="incluir">
-            <summary>+ Incluir despesa</summary>
-            <FormDespesa
-              tipos={tiposDoBloco}
-              pagaPor={bloco.pagaPor}
-              competencia={mes.competencia}
-              pendente={ehPendente}
-              voltar={voltar}
-              hoje={hoje}
-              nomes={nomes}
-            />
-          </details>
-        )}
-      </div>
-    );
-  }
+  const pendentes = blocosDoMes(mes.competencia, despesas).find((b) => b.chave === "pendentes")!;
 
   return (
     <div className="app">
@@ -124,40 +67,22 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
         <section className="cartao composicao">
           <h2>Composição do mês</h2>
           <div className="linha"><span>Pensão ({mes.percentualPensao}% de {formatarReais(mes.salarioMinimo)})</span><span className="num">{formatarReais(mes.pensao)}</span></div>
-          <details>
-            <summary className="linha"><span>Despesas da decisão (saldo 50%)</span><span className="num">{formatarReais(mes.despesasDecisao)}</span></summary>
-            <TabelaBloco bloco={blocos.decisao_recebedora} titulo={`Despesas Decisão - ${nomes.recebedora}`} />
-            <TabelaBloco bloco={blocos.decisao_pagador} titulo={`Despesas Decisão - ${nomes.pagador}`} />
-          </details>
-          <details>
-            <summary className="linha"><span>Despesas combinadas</span><span className="num">{formatarReais(mes.despesasCombinadas)}</span></summary>
-            <TabelaBloco bloco={blocos.combinada_recebedora} titulo={`Despesas Extras - ${nomes.recebedora}`} />
-            <TabelaBloco bloco={blocos.combinada_pagador} titulo={`Despesas Extras - ${nomes.pagador}`} />
-          </details>
+          <Link href={discriminacao} className="linha ir"><span>Despesas da decisão (saldo 50%)</span><span className="num">{formatarReais(mes.despesasDecisao)}</span></Link>
+          <Link href={discriminacao} className="linha ir"><span>Despesas combinadas</span><span className="num">{formatarReais(mes.despesasCombinadas)}</span></Link>
           {mes.pago > 0 && <div className="linha"><span>Já pago</span><span className="num">{formatarReais(mes.pago)}</span></div>}
           <div className="divisor" />
           <div className="linha suave"><span>Vai no recibo judicial</span><span className="num">{formatarReais(mes.totalRecibo)}</span></div>
           <div className="linha suave"><span>Vai no recibo extra</span><span className="num">{formatarReais(mes.totalDemonstrativo)}</span></div>
-          <p className="dica">Toque nas despesas para ver o detalhe no modelo da planilha e incluir novas.</p>
+          <Link href={discriminacao} style={{ fontSize: 13, fontWeight: 600 }}>Discriminação das despesas</Link>
         </section>
 
-        {pendentes.itens.length > 0 ? (
-          <details className="alerta pendencia">
-            <summary>
-              <strong>Pendência: outras despesas</strong>
-              <br />
-              {formatarReais(pendentes.totalValor)} em {pendentes.itens.length}{" "}
-              {pendentes.itens.length === 1 ? "despesa" : "despesas"}. Ainda não entram no cálculo.
-            </summary>
-            <TabelaBloco bloco={pendentes} titulo="Outras Despesas Pendentes" />
-          </details>
-        ) : (
-          podeLancar && (
-            <details className="cartao pendencia">
-              <summary className="dica">+ Registrar despesa pendente (fica fora do cálculo)</summary>
-              <TabelaBloco bloco={pendentes} titulo="Outras Despesas Pendentes" />
-            </details>
-          )
+        {pendentes.itens.length > 0 && (
+          <Link href={`${discriminacao}#pendentes`} className="alerta" style={{ textDecoration: "none" }}>
+            <strong>Pendência: outras despesas</strong>
+            <br />
+            {formatarReais(pendentes.totalValor)} em {pendentes.itens.length}{" "}
+            {pendentes.itens.length === 1 ? "despesa" : "despesas"}. Ainda não entram no cálculo.
+          </Link>
         )}
 
         {devedorAnterior > 0 && (
