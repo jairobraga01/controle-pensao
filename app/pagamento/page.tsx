@@ -1,5 +1,6 @@
 import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { redirect } from "next/navigation";
+import { CampoComprovante } from "@/components/CampoComprovante";
 import { Menu } from "@/components/Menu";
 import { formatarReais, nomeDoMes } from "@/lib/calculo";
 import { carregarContexto, carregarLancamentos, competenciaAtual, hojeISO, resumir } from "@/lib/dados";
@@ -54,7 +55,7 @@ export default async function Pagamento({
           </label>
           <label>
             Comprovante da transferência (obrigatório)
-            <input name="comprovante" type="file" accept="application/pdf,image/*" multiple required />
+            <CampoComprovante processoId={ctx.processo.id} />
           </label>
           <p className="dica">Ao salvar, o app gera o recibo judicial e o recibo extra do mês para a mãe confirmar.</p>
           {erro && <p className="erro">{erro}</p>}

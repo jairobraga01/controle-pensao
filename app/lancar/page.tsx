@@ -1,5 +1,6 @@
 import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { redirect } from "next/navigation";
+import { CampoComprovante } from "@/components/CampoComprovante";
 import { CampoMes } from "@/components/CampoMes";
 import { Menu } from "@/components/Menu";
 import { TipoDespesa } from "@/components/TipoDespesa";
@@ -36,7 +37,7 @@ export default async function Lancar({ searchParams }: { searchParams: Promise<{
           </label>
           <label>
             Comprovante (obrigatório)
-            <input name="comprovante" type="file" accept="application/pdf,image/*" multiple required />
+            <CampoComprovante processoId={ctx.processo.id} />
           </label>
           {erro && <p className="erro">{erro}</p>}
           <BotaoEnviar>Salvar despesa</BotaoEnviar>

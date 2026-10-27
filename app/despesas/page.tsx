@@ -32,6 +32,7 @@ export default async function Discriminacao({ searchParams }: { searchParams: Pr
     voltar: `/despesas?mes=${mes.competencia}`,
     hoje: hojeISO(),
     nomes,
+    processoId: ctx.processo.id,
   };
 
   return (

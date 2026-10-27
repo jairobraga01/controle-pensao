@@ -1,4 +1,5 @@
 import { BotaoEnviar } from "@/components/BotaoEnviar";
+import { CampoComprovante } from "@/components/CampoComprovante";
 import { CampoMes } from "@/components/CampoMes";
 import { TipoDespesa } from "@/components/TipoDespesa";
 import { lancarDespesa } from "@/app/lancar/actions";
@@ -14,6 +15,7 @@ export function FormDespesa(props: {
   voltar: string;
   hoje: string;
   nomes: Record<Parte, string>;
+  processoId: string;
 }) {
   return (
     <form action={lancarDespesa} className="form-bloco">
@@ -46,7 +48,7 @@ export function FormDespesa(props: {
       )}
       <label>
         Comprovante (obrigatório)
-        <input name="comprovante" type="file" accept="application/pdf,image/*" multiple required />
+        <CampoComprovante processoId={props.processoId} />
       </label>
       <BotaoEnviar>Incluir despesa</BotaoEnviar>
     </form>

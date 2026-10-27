@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { arquivosDoForm, salvarComprovantes } from "@/lib/comprovantes";
+import { enviadosDoForm, registrarEnviados } from "@/lib/comprovantes";
 import { carregarContexto } from "@/lib/dados";
 
 function destino(form: FormData) {
@@ -21,8 +21,8 @@ export async function confirmar(form: FormData) {
 export async function anexarAssinado(form: FormData) {
   const ctx = await carregarContexto();
   const volta = destino(form);
-  const arquivos = arquivosDoForm(form).filter((a) => a.type === "application/pdf");
-  if (!arquivos.length) redirect(`${volta}?erro=${encodeURIComponent("Envie o PDF assinado.")}`);
-  await salvarComprovantes(ctx, arquivos, { recibo_id: String(form.get("id")) });
+  const enviados = enviadosDoForm(form, ctx.processo.id);
+  if (!enviados.length) redirect(`${volta}?erro=${encodeURIComponent("Envie o PDF assinado.")}`);
+  await registrarEnviados(ctx, enviados, { recibo_id: String(form.get("id")) });
   revalidatePath(volta);
 }
