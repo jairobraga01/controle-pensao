@@ -79,6 +79,8 @@ input[type="checkbox"], input[type="radio"] { width: 20px; min-height: 20px; acc
 .seletor-mes button { border: 0; background: none; font-size: 22px; line-height: 1; padding: 4px 8px; cursor: pointer; color: var(--suave); }
 .seletor-mes button:disabled { opacity: 0.3; cursor: default; }
 
+.composicao .ir { color: inherit; text-decoration: none; }
+.composicao .ir > span:first-child::after { content: " ›"; color: var(--suave); }
 .composicao details > summary { list-style: none; cursor: pointer; }
 .composicao details > summary::-webkit-details-marker, .pendencia > summary::-webkit-details-marker { display: none; }
 .composicao details > summary > span:first-child::after { content: " ▸"; color: var(--suave); font-size: 11px; }
@@ -88,7 +90,12 @@ input[type="checkbox"], input[type="radio"] { width: 20px; min-height: 20px; acc
 .pendencia[open] .planilha { margin-top: 10px; }
 .pendencia .planilha { background: #fff; color: var(--texto); border-radius: 10px; padding: 4px 10px 8px; }
 
-.planilha { margin-top: 8px; }
+.planilha { gap: 0; padding: 4px 12px 10px; overflow: hidden; }
+.planilha .pl-cab { background: var(--marca-claro); color: var(--marca); margin: 0 -12px; padding: 9px 12px; }
+.planilha .pl-total { background: var(--alerta-fundo); margin: 0 -12px; padding: 9px 12px; }
+.planilha .pl-total > span:not(:first-child) { background: #fff3a6; border-radius: 6px; padding: 0 4px; }
+.resumo .pl-linha { grid-template-columns: minmax(0, 1fr) 100px; }
+.resumo .pl-linha > span:last-child { color: var(--ok-texto); font-weight: 700; }
 .pl-linha { display: grid; grid-template-columns: minmax(0, 1fr) 84px 84px; gap: 6px; padding: 7px 0; font-size: 12.5px; color: inherit; text-decoration: none; border-bottom: 1px solid var(--linha); }
 .pl-linha > span:not(:first-child) { text-align: right; white-space: nowrap; }
 .pl-cab { font-weight: 700; font-size: 13px; }
