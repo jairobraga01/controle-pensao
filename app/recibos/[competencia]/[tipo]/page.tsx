@@ -1,3 +1,4 @@
+import { CampoComprovante } from "@/components/CampoComprovante";
 import { BotaoEnviar } from "@/components/BotaoEnviar";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -108,7 +109,8 @@ export default async function Recibo({
             <form action={anexarAssinado}>
               <input type="hidden" name="id" value={recibo.id} />
               <input type="hidden" name="volta" value={base} />
-              <label>Anexar PDF assinado<input name="comprovante" type="file" accept="application/pdf" required /></label>
+              <label>Anexar PDF assinado</label>
+              <CampoComprovante processoId={ctx.processo.id} apenasPdf multiplo={false} />
               {erro && <p className="erro">{erro}</p>}
               <button className="botao contorno" type="submit">Anexar</button>
             </form>

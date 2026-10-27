@@ -109,3 +109,6 @@ input[type="checkbox"], input[type="radio"] { width: 20px; min-height: 20px; acc
 .segmento { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .segmento button { font: inherit; font-size: 14px; font-weight: 600; min-height: 44px; border-radius: 12px; border: 1px solid var(--borda); background: #fff; color: var(--texto); cursor: pointer; }
 .segmento button[aria-checked="true"] { background: var(--marca-claro); border-color: var(--marca); color: var(--marca); }
+
+.comprovante { display: flex; flex-direction: column; gap: 6px; position: relative; }
+.comprovante .trava { position: absolute; bottom: 0; left: 0; width: 1px; height: 1px; min-height: 0; opacity: 0; padding: 0; border: 0; }

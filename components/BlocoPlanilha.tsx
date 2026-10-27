@@ -21,6 +21,7 @@ export function BlocoPlanilha(props: {
   voltar: string;
   hoje: string;
   nomes: Record<Parte, string>;
+  processoId: string;
 }) {
   const { bloco, competencia } = props;
   const tipos = bloco.categoria ? props.tipos.filter((t) => t.categoria === bloco.categoria) : props.tipos;
@@ -66,6 +67,7 @@ export function BlocoPlanilha(props: {
             voltar={props.voltar}
             hoje={props.hoje}
             nomes={props.nomes}
+            processoId={props.processoId}
           />
         </details>
       )}

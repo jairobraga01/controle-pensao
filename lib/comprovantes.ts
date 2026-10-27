@@ -1,43 +1,26 @@
 import "server-only";
 import type { Contexto } from "./dados";
 
-const TIPOS = ["application/pdf", "image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
-const LIMITE = 10 * 1024 * 1024;
-
-export function arquivosDoForm(form: FormData, campo = "comprovante"): File[] {
-  return form.getAll(campo).filter((f): f is File => f instanceof File && f.size > 0);
+/** Comprovantes que o navegador já enviou ao armazenamento (só da pasta do processo). */
+export function enviadosDoForm(form: FormData, processoId: string): { caminho: string; nome: string }[] {
+  const caminhos = form.getAll("comprovante_caminho").map(String);
+  const nomes = form.getAll("comprovante_nome").map(String);
+  return caminhos
+    .map((caminho, i) => ({ caminho, nome: nomes[i] || caminho.split("/").pop() || "comprovante" }))
+    .filter((c) => c.caminho.startsWith(`${processoId}/`) && !c.caminho.includes(".."));
 }
 
-export function validarArquivos(arquivos: File[]): string | null {
-  if (arquivos.length === 0) return "Anexe pelo menos um comprovante.";
-  for (const a of arquivos) {
-    if (!TIPOS.includes(a.type)) return `Formato não aceito: ${a.name}. Use PDF, JPG ou PNG.`;
-    if (a.size > LIMITE) return `${a.name} passa de 10 MB.`;
-  }
-  return null;
-}
-
-/** Envia os arquivos para o bucket e registra cada um ligado ao lançamento. */
-export async function salvarComprovantes(
+/** Registra os comprovantes enviados pelo navegador, ligados ao lançamento. */
+export async function registrarEnviados(
   ctx: Contexto,
-  arquivos: File[],
+  enviados: { caminho: string; nome: string }[],
   vinculo: { despesa_id?: string; pagamento_id?: string; recibo_id?: string },
 ) {
-  for (const arquivo of arquivos) {
-    const seguro = arquivo.name.normalize("NFD").replace(/[^\w.-]+/g, "_").slice(-80);
-    const caminho = `${ctx.processo.id}/${crypto.randomUUID()}-${seguro}`;
-    const { error: erroEnvio } = await ctx.supabase.storage
-      .from("comprovantes")
-      .upload(caminho, arquivo, { contentType: arquivo.type });
-    if (erroEnvio) throw new Error(`Falha ao enviar ${arquivo.name}: ${erroEnvio.message}`);
-    const { error } = await ctx.supabase.from("comprovantes").insert({
-      processo_id: ctx.processo.id,
-      caminho,
-      nome_arquivo: arquivo.name,
-      ...vinculo,
-    });
-    if (error) throw new Error(error.message);
-  }
+  if (!enviados.length) return;
+  const { error } = await ctx.supabase.from("comprovantes").insert(
+    enviados.map((c) => ({ processo_id: ctx.processo.id, caminho: c.caminho, nome_arquivo: c.nome, ...vinculo })),
+  );
+  if (error) throw new Error(error.message);
 }
 
 export async function linksDosComprovantes(ctx: Contexto, filtro: { coluna: string; id: string }) {

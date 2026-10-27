@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { lerReais, type Divisao } from "@/lib/calculo";
-import { arquivosDoForm, salvarComprovantes, validarArquivos } from "@/lib/comprovantes";
+import { enviadosDoForm, registrarEnviados } from "@/lib/comprovantes";
 import { carregarContexto, carregarTipos } from "@/lib/dados";
 import { lerMes } from "@/lib/mes";
 import { acharTipo, regraDoTipo } from "@/lib/tipos";
@@ -47,9 +47,8 @@ export async function lancarDespesa(form: FormData) {
   const regra = regraDoTipo(tipo, manual ?? undefined);
   const d = regra.divisao;
 
-  const arquivos = arquivosDoForm(form);
-  const problema = validarArquivos(arquivos);
-  if (problema) voltarComErro(voltar, problema);
+  const enviados = enviadosDoForm(form, ctx.processo.id);
+  if (!enviados.length) voltarComErro(voltar, "Anexe pelo menos um comprovante.");
 
   const { data, error } = await ctx.supabase
     .from("despesas")
@@ -74,7 +73,7 @@ export async function lancarDespesa(form: FormData) {
   if (error) voltarComErro(voltar, error.message);
 
   try {
-    await salvarComprovantes(ctx, arquivos, { despesa_id: data.id });
+    await registrarEnviados(ctx, enviados, { despesa_id: data.id });
   } catch (e) {
     voltarComErro(voltar, `Despesa salva, mas o comprovante falhou: ${(e as Error).message}`);
   }

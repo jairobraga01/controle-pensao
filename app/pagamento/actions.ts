@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { lerReais } from "@/lib/calculo";
-import { arquivosDoForm, salvarComprovantes, validarArquivos } from "@/lib/comprovantes";
+import { enviadosDoForm, registrarEnviados } from "@/lib/comprovantes";
 import { carregarContexto, carregarLancamentos, contaNoCalculo, paraDespesa, resumir } from "@/lib/dados";
 import { TIPOS_RECIBO, itensDoRecibo, valorDoRecibo } from "@/lib/recibo";
 
@@ -15,9 +15,8 @@ export async function registrarPagamento(form: FormData) {
   if (ctx.eu.papel !== "pagador") erro("Só quem paga registra pagamentos.");
   const valor = lerReais(String(form.get("valor") ?? ""));
   if (!valor) erro("Valor inválido.");
-  const arquivos = arquivosDoForm(form);
-  const problema = validarArquivos(arquivos);
-  if (problema) erro(problema);
+  const enviados = enviadosDoForm(form, ctx.processo.id);
+  if (!enviados.length) erro("Anexe pelo menos um comprovante.");
 
   // Pendências marcadas para quitar entram no cálculo deste mês antes do recibo.
   if (form.get("quitar_pendentes") === "1") {
@@ -48,7 +47,7 @@ export async function registrarPagamento(form: FormData) {
   if (error || !pag) return erro(error?.message ?? "Falha ao salvar o pagamento.");
 
   try {
-    await salvarComprovantes(ctx, arquivos, { pagamento_id: pag.id });
+    await registrarEnviados(ctx, enviados, { pagamento_id: pag.id });
   } catch (e) {
     erro(`Pagamento salvo, mas o comprovante falhou: ${(e as Error).message}`);
   }
