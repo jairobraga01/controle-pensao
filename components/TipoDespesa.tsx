@@ -15,16 +15,24 @@ function divisaoEscolhida(v: string, fixo: string): Divisao | null {
 }
 
 /** Categoria (prevista na decisão ou combinada), tipo, divisão e a parte do pai, como no protótipo. */
-export function TipoDespesa({ tipos }: { tipos: TipoCadastro[] }) {
+export function TipoDespesa({ tipos, inicial }: {
+  tipos: TipoCadastro[];
+  /** Valores de uma despesa já lançada, ao alterar. */
+  inicial?: { codigo: string; divisao: string; fixo: string };
+}) {
   const categorias = (["decisao", "combinada"] as Categoria[]).filter((c) => tipos.some((t) => t.categoria === c));
-  const [categoria, setCategoria] = useState<Categoria>(categorias[0] ?? "decisao");
+  const tipoInicial = inicial && tipos.find((t) => t.codigo === inicial.codigo);
+  const [categoria, setCategoria] = useState<Categoria>(tipoInicial?.categoria ?? categorias[0] ?? "decisao");
   const daCategoria = tipos.filter((t) => t.categoria === categoria);
   const [codigo, setCodigo] = useState(
-    tipos.find((t) => t.codigo === "escolar" && t.categoria === categoria)?.codigo ?? daCategoria[0]?.codigo ?? "",
+    tipoInicial?.codigo ??
+      tipos.find((t) => t.codigo === "escolar" && t.categoria === categoria)?.codigo ??
+      daCategoria[0]?.codigo ??
+      "",
   );
   const t = tipos.find((x) => x.codigo === codigo);
-  const [divisao, setDivisao] = useState("metade");
-  const [fixo, setFixo] = useState("");
+  const [divisao, setDivisao] = useState(inicial?.divisao || "metade");
+  const [fixo, setFixo] = useState(inicial?.fixo ?? "");
 
   // Lê o valor total digitado no mesmo formulário para mostrar a parte do pai.
   const ancora = useRef<HTMLSpanElement>(null);

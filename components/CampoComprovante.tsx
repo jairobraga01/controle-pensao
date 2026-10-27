@@ -12,8 +12,9 @@ interface Enviado { caminho: string; nome: string }
  * Envia o comprovante do navegador direto para o armazenamento. O formulário
  * leva só o caminho do arquivo: a Vercel recusa envios acima de 4,5 MB.
  */
-export function CampoComprovante({ processoId, apenasPdf = false, multiplo = true }: {
+export function CampoComprovante({ processoId, apenasPdf = false, multiplo = true, obrigatorio = true }: {
   processoId: string;
+  obrigatorio?: boolean;
   apenasPdf?: boolean;
   multiplo?: boolean;
 }) {
@@ -25,9 +26,9 @@ export function CampoComprovante({ processoId, apenasPdf = false, multiplo = tru
   const trava = useRef<HTMLInputElement>(null);
   useEffect(() => {
     trava.current?.setCustomValidity(
-      enviando > 0 ? "Aguarde o envio do comprovante." : enviados.length === 0 ? "Anexe o comprovante." : "",
+      enviando > 0 ? "Aguarde o envio do comprovante." : obrigatorio && enviados.length === 0 ? "Anexe o comprovante." : "",
     );
-  }, [enviando, enviados.length]);
+  }, [enviando, enviados.length, obrigatorio]);
 
   async function escolher(e: React.ChangeEvent<HTMLInputElement>) {
     const arquivos = Array.from(e.target.files ?? []);
