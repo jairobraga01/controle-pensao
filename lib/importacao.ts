@@ -8,16 +8,25 @@ export const CABECALHO = [
   "lancamento", "competencia", "data", "descricao", "tipo", "valor", "pago_por", "divisao", "valor_fixo", "forma",
 ] as const;
 
+// Modelo oficial: a aba 10-2026 da planilha de controle (Despesas Decisão e
+// Extras de cada parte, pagamento do mês e Outras Despesas Pendentes).
+// "pendente" registra a despesa fora do cálculo até ser incluída num mês.
 export const MODELO_CSV =
   CABECALHO.join(";") +
   "\n" +
   [
-    "despesa;2026-10;2026-10-05;Mensalidade;escolar;1554,37;mae;;;",
-    "despesa;2026-10;2026-10-05;Plano de saúde;medica;453,39;pai;;;",
-    "despesa;2026-10;2026-10-05;Van;van;600,00;mae;;;",
-    "despesa;2026-06;2026-05-31;Roupas;roupas;769,20;mae;;;",
-    "despesa;2026-06;2026-06-11;Salão;outra;70,00;mae;metade;;",
-    "pagamento;2026-10;2026-10-08;;;2835,36;;;;pix",
+    "despesa;2026-10;05/10/2026;Mensalidade escolar;escolar;1554,37;mae;;;",
+    "despesa;2026-10;05/10/2026;Van escolar;van;600,00;mae;;;",
+    "despesa;2026-10;10/09/2026;Livro;escolar;83,33;mae;;;",
+    "despesa;2026-10;05/10/2026;Academia;natacao_academia;120,00;mae;;;",
+    "despesa;2026-10;23/09/2026;Aniversário (boliche);outra;2814,00;mae;metade;;",
+    "despesa;2026-10;10/09/2026;Mensalidade escolar;escolar;763,75;pai;;;",
+    "despesa;2026-10;05/10/2026;Plano de saúde;medica;453,39;pai;;;",
+    "pagamento;2026-10;10/10/2026;;;3822,48;;;;pix",
+    "pendente;2026-05;23/05/2026;Roupas;roupas;279,80;mae;;;",
+    "pendente;2026-05;31/05/2026;Roupas;roupas;769,20;mae;;;",
+    "pendente;2026-05;31/05/2026;Roupas;roupas;159,80;mae;;;",
+    "pendente;2026-06;20/06/2026;Roupas;roupas;240,00;mae;;;",
   ].join("\n") +
   "\n";
 
@@ -31,6 +40,7 @@ export interface DespesaImportada {
   pagaPor: Parte;
   divisao: Divisao;
   categoria: "decisao" | "combinada";
+  pendente: boolean;
 }
 
 export interface PagamentoImportado {
@@ -125,7 +135,8 @@ export function lerCsv(texto: string, tipos: TipoCadastro[] = TIPOS_PADRAO): Res
       res.pagamentos.push({ linha: n, competencia: c.competencia, data, valor, forma });
       continue;
     }
-    if (c.lancamento.toLowerCase() !== "despesa") { erro(`lançamento deve ser "despesa" ou "pagamento".`); continue; }
+    const lancamento = c.lancamento.toLowerCase();
+    if (lancamento !== "despesa" && lancamento !== "pendente") { erro(`lançamento deve ser "despesa", "pendente" ou "pagamento".`); continue; }
     if (!c.descricao) { erro("descrição vazia."); continue; }
     const tipo = acharTipo(tipos.filter((t) => t.ativo), c.tipo);
     if (!tipo) { erro(`tipo "${c.tipo}" inválido. Use um código da aba Dados da Pensão.`); continue; }
@@ -140,7 +151,7 @@ export function lerCsv(texto: string, tipos: TipoCadastro[] = TIPOS_PADRAO): Res
     const regra = regraDoTipo(tipo, manual);
     res.despesas.push({
       linha: n, competencia: c.competencia, data, descricao: c.descricao, tipo: c.tipo,
-      valor, pagaPor, ...regra,
+      valor, pagaPor, ...regra, pendente: lancamento === "pendente",
     });
   }
   return res;

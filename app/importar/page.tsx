@@ -28,7 +28,7 @@ export default async function Importar({
         <section className="cartao">
           <h2>Como funciona</h2>
           <p className="dica">
-            Baixe o modelo, preencha uma linha por despesa ou pagamento (pode abrir no Excel ou no
+            O modelo segue a aba 10-2026 da planilha. Baixe, preencha uma linha por despesa ou pagamento (pode abrir no Excel ou no
             LibreOffice) e salve como CSV separado por ponto e vírgula. Se alguma linha tiver erro,
             nada é importado e o app mostra o que corrigir.
           </p>
@@ -36,7 +36,8 @@ export default async function Importar({
           <p className="dica">
             Na coluna tipo, use o código: {tipos.map((t) => `${t.codigo} (${t.rotulo})`).join(", ")}. Nos
             tipos sem divisão própria, a coluna divisao recebe metade, pai, mae ou fixo (com
-            valor_fixo). pago_por: pai ou mae.
+            valor_fixo). pago_por: pai ou mae. Na coluna lancamento, use despesa, pagamento ou pendente
+            (Outras Despesas Pendentes: ficam registradas, mas fora do cálculo até serem incluídas num mês).
           </p>
         </section>
         <form action={importar} className="cartao">

@@ -86,6 +86,21 @@ export function efeitoNoDevido(d: Despesa): number {
   return -partes(d).recebedora;
 }
 
+/**
+ * Efeito sem arredondar o meio centavo das despesas divididas ao meio. A
+ * planilha (aba 10-2026, modelo oficial) soma as metades exatas e só
+ * arredonda o total: 777,185 + 200 + 41,665 = 1.018,85.
+ */
+export function efeitoExato(d: Despesa): number {
+  if (d.divisao.tipo !== "metade") return efeitoNoDevido(d);
+  return d.pagaPor === "recebedora" ? d.valor / 2 : -d.valor / 2;
+}
+
+/** Soma efeitos exatos e arredonda só no fim, como a planilha. */
+export function somarEfeitos(despesas: Despesa[]): number {
+  return arred(despesas.reduce((s, d) => s + efeitoExato(d), 0));
+}
+
 export function vigente<T extends { vigenciaInicio: string }>(
   lista: T[],
   competencia: string,
@@ -113,13 +128,8 @@ export function calcularMes(params: {
   const sm = vigente(params.salarios, competencia);
   const pensao = arred((sm.valor * regra.percentualPensao) / 100);
 
-  let despesasDecisao = 0;
-  let despesasCombinadas = 0;
-  for (const d of params.despesas) {
-    const efeito = efeitoNoDevido(d);
-    if (d.categoria === "decisao") despesasDecisao += efeito;
-    else despesasCombinadas += efeito;
-  }
+  const despesasDecisao = somarEfeitos(params.despesas.filter((d) => d.categoria === "decisao"));
+  const despesasCombinadas = somarEfeitos(params.despesas.filter((d) => d.categoria !== "decisao"));
 
   const totalRecibo = pensao + despesasDecisao;
   const totalDemonstrativo = despesasCombinadas;

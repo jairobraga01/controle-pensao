@@ -8,11 +8,11 @@ import {
   type ResumoMes,
   type SalarioMinimo,
 } from "./calculo";
-import { paraDespesa, type LinhaDespesa, type LinhaPagamento } from "./dados-tipos";
+import { contaNoCalculo, paraDespesa, type LinhaDespesa, type LinhaPagamento } from "./dados-tipos";
 import { TIPOS_PADRAO, paraTipo, type LinhaTipo, type TipoCadastro } from "./tipos";
 import { criarClienteServidor } from "./supabase/server";
 
-export { paraDespesa, type LinhaDespesa, type LinhaPagamento };
+export { contaNoCalculo, paraDespesa, type LinhaDespesa, type LinhaPagamento };
 
 export type Papel = "pagador" | "recebedora" | "advogado";
 
@@ -117,7 +117,7 @@ export async function carregarLancamentos(ctx: Contexto, competencia?: string) {
   };
 }
 
-/** Despesas contestadas ficam fora do cálculo até serem resolvidas. */
+/** Despesas contestadas ou pendentes ficam fora do cálculo. */
 export function resumir(
   ctx: Contexto,
   competencia: string,
@@ -129,7 +129,7 @@ export function resumir(
     regras: ctx.regras,
     salarios: ctx.salarios,
     despesas: despesas
-      .filter((d) => d.competencia === competencia && !d.contestada_em)
+      .filter((d) => d.competencia === competencia && contaNoCalculo(d))
       .map(paraDespesa),
     pagamentos: pagamentos.filter((p) => p.competencia === competencia).map(paraPagamento),
   });

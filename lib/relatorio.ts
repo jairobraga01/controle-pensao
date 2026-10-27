@@ -1,5 +1,5 @@
 import { efeitoNoDevido, type ResumoMes } from "./calculo";
-import { paraDespesa, type LinhaDespesa, type LinhaPagamento } from "./dados-tipos";
+import { contaNoCalculo, paraDespesa, type LinhaDespesa, type LinhaPagamento } from "./dados-tipos";
 
 export interface ReciboResumo {
   competencia: string;
@@ -61,7 +61,7 @@ export function montarRelatorio(
     linhas,
     totais: { pensao: soma("pensao"), judicial: soma("judicial"), extra: soma("extra"), pago: soma("pago"), saldo: soma("saldo") },
     despesasJudiciais: despesas
-      .filter((d) => noPeriodo.has(d.competencia) && d.categoria === "decisao" && !d.contestada_em)
+      .filter((d) => noPeriodo.has(d.competencia) && d.categoria === "decisao" && contaNoCalculo(d))
       .sort((a, b) => a.competencia.localeCompare(b.competencia) || a.data.localeCompare(b.data))
       .map((d) => ({
         competencia: d.competencia,

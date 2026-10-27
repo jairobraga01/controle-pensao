@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { lerReais } from "@/lib/calculo";
 import { arquivosDoForm, salvarComprovantes, validarArquivos } from "@/lib/comprovantes";
-import { carregarContexto, carregarLancamentos, paraDespesa, resumir } from "@/lib/dados";
+import { carregarContexto, carregarLancamentos, contaNoCalculo, paraDespesa, resumir } from "@/lib/dados";
 import { TIPOS_RECIBO, itensDoRecibo, valorDoRecibo } from "@/lib/recibo";
 
 export async function registrarPagamento(form: FormData) {
@@ -48,7 +48,7 @@ async function gerarRecibos(competencia: string) {
   const ctx = await carregarContexto();
   const { despesas, pagamentos } = await carregarLancamentos(ctx, competencia);
   const resumo = resumir(ctx, competencia, despesas, pagamentos);
-  const validas = despesas.filter((d) => !d.contestada_em).map(paraDespesa);
+  const validas = despesas.filter(contaNoCalculo).map(paraDespesa);
   const { data: existentes } = await ctx.supabase
     .from("recibos")
     .select("id, tipo, confirmado_em")

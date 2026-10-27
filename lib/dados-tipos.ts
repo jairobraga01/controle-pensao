@@ -18,6 +18,8 @@ export interface LinhaDespesa {
   contestada_em: string | null;
   motivo_contestacao: string | null;
   importado: boolean;
+  /** Registrada, mas fora do cálculo até ser incluída num mês. */
+  pendente?: boolean;
 }
 
 export interface LinhaPagamento {
@@ -27,6 +29,11 @@ export interface LinhaPagamento {
   data: string;
   forma: string;
   importado: boolean;
+}
+
+/** Despesas contestadas ou pendentes ficam fora do cálculo e dos recibos. */
+export function contaNoCalculo(l: LinhaDespesa): boolean {
+  return !l.contestada_em && !l.pendente;
 }
 
 export function paraDespesa(l: LinhaDespesa): Despesa {
