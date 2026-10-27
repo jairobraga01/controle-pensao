@@ -4,7 +4,8 @@ import { CampoMes } from "@/components/CampoMes";
 import { Menu } from "@/components/Menu";
 import { carregarContexto, carregarTipos } from "@/lib/dados";
 import { descreverDivisao, nomeDoRecibo, type TipoCadastro } from "@/lib/tipos";
-import { ativarTipo, criarTipo, excluirPensao, salvarPensao, salvarTipo } from "./actions";
+import { formatarReais } from "@/lib/calculo";
+import { ativarTipo, criarTipo, excluirPensao, excluirSalario, salvarPensao, salvarSalario, salvarTipo } from "./actions";
 
 function valorDaDivisao(t?: TipoCadastro): string {
   const d = t?.divisao;
@@ -69,6 +70,9 @@ export default async function DadosDaPensao({
   const regra = regras?.find((r) => r.vigencia_inicio === p.inicio_competencia) ?? regras?.[0];
   const temLancamentos = contagens.some((c) => (c.count ?? 0) > 0);
   const ativos = tipos.filter((t) => t.ativo);
+  const salarios = [...ctx.salarios].sort((a, b) => b.vigenciaInicio.localeCompare(a.vigenciaInicio));
+  const percentual = Number(regra?.percentual_pensao ?? 120);
+  const reais = (c: number) => (c / 100).toFixed(2).replace(".", ",");
   const excluidos = tipos.filter((t) => !t.ativo);
 
   return (
@@ -156,6 +160,52 @@ export default async function DadosDaPensao({
             </form>
           </details>
         )}
+
+        <section className="cartao">
+          <h2>Salário mínimo</h2>
+          <p className="dica">
+            A pensão de cada mês usa o salário mínimo vigente naquele mês ({percentual}%). Inclua o valor
+            de cada ano quando for publicado; valores passados podem ser corrigidos aqui.
+          </p>
+          <div className="pl-linha pl-cab" style={{ gridTemplateColumns: "minmax(0,1fr) 110px 110px" }}>
+            <span>A partir de</span><span>Salário</span><span>Pensão</span>
+          </div>
+          {salarios.map((sm) => (
+            <div key={sm.vigenciaInicio}>
+              <div className="pl-linha" style={{ gridTemplateColumns: "minmax(0,1fr) 110px 110px" }}>
+                <span>{sm.vigenciaInicio.split("-").reverse().join("/")}</span>
+                <span className="num">{formatarReais(sm.valor)}</span>
+                <span className="num">{formatarReais(Math.round((sm.valor * percentual) / 100))}</span>
+              </div>
+              {!leitura && (
+                <details className="incluir">
+                  <summary>Alterar ou excluir</summary>
+                  <form action={salvarSalario} className="form-bloco">
+                    <input type="hidden" name="vigencia" value={sm.vigenciaInicio} />
+                    <label>Valor (R$)<input name="valor" required inputMode="decimal" defaultValue={reais(sm.valor)} /></label>
+                    <BotaoEnviar>Salvar valor</BotaoEnviar>
+                  </form>
+                  <form action={excluirSalario} style={{ marginTop: 6 }}>
+                    <input type="hidden" name="vigencia" value={sm.vigenciaInicio} />
+                    <button className="link" style={{ color: "var(--erro)" }}>Excluir este salário mínimo</button>
+                  </form>
+                </details>
+              )}
+            </div>
+          ))}
+          {!leitura && (
+            <details className="incluir">
+              <summary>+ Incluir salário mínimo</summary>
+              <form action={salvarSalario} className="form-bloco">
+                <div className="grade2">
+                  <label>A partir de<CampoMes name="vigencia" /></label>
+                  <label>Valor (R$)<input name="valor" required inputMode="decimal" placeholder="0,00" /></label>
+                </div>
+                <BotaoEnviar>Incluir</BotaoEnviar>
+              </form>
+            </details>
+          )}
+        </section>
 
         <section className="cartao">
           <h2>Outros dados</h2>

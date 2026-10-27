@@ -116,3 +116,27 @@ export async function excluirPensao(form: FormData) {
   if (error) voltar({ erro: error.message });
   redirect("/novo");
 }
+
+/** Inclui ou altera o salário mínimo que vale a partir de um mês. */
+export async function salvarSalario(form: FormData) {
+  const ctx = await contextoDeParte();
+  const mes = lerMes(texto(form, "vigencia"));
+  if (!mes) voltar({ erro: "Informe o mês de início como MM/AAAA, por exemplo 01/2027." });
+  const valor = lerReais(texto(form, "valor"));
+  if (!valor) voltar({ erro: "Informe o valor do salário mínimo." });
+  const { error } = await ctx.supabase
+    .from("salarios_minimos")
+    .upsert({ vigencia_inicio: mes, valor_centavos: valor }, { onConflict: "vigencia_inicio" });
+  if (error) voltar({ erro: error.message });
+  voltar({ ok: `Salário mínimo de ${mes.split("-").reverse().join("/")} salvo.` });
+}
+
+export async function excluirSalario(form: FormData) {
+  const ctx = await contextoDeParte();
+  const mes = texto(form, "vigencia");
+  const { count } = await ctx.supabase.from("salarios_minimos").select("vigencia_inicio", { count: "exact", head: true });
+  if ((count ?? 0) <= 1) voltar({ erro: "A tabela precisa de pelo menos um salário mínimo." });
+  const { error } = await ctx.supabase.from("salarios_minimos").delete().eq("vigencia_inicio", mes);
+  if (error) voltar({ erro: error.message });
+  voltar({ ok: `Salário mínimo de ${mes.split("-").reverse().join("/")} excluído.` });
+}
