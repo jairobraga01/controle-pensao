@@ -7,42 +7,49 @@ import { carregarContexto, carregarTipos } from "@/lib/dados";
 import { lerMes } from "@/lib/mes";
 import { acharTipo, regraDoTipo } from "@/lib/tipos";
 
-function voltarComErro(msg: string): never {
-  redirect(`/lancar?erro=${encodeURIComponent(msg)}`);
+/** Página de onde o formulário veio (a tela inicial também lança despesas). */
+function paginaDeVolta(form: FormData): string {
+  const v = String(form.get("voltar") ?? "");
+  return v.startsWith("/") && !v.startsWith("//") ? v : "/lancar";
+}
+
+function voltarComErro(pagina: string, msg: string): never {
+  redirect(`${pagina}${pagina.includes("?") ? "&" : "?"}erro=${encodeURIComponent(msg)}`);
 }
 
 /** Divisão escolhida à mão, para tipos sem divisão própria. */
-function divisaoManual(form: FormData): Divisao | null {
+function divisaoManual(form: FormData, voltar: string): Divisao | null {
   const v = String(form.get("divisao") ?? "");
   if (v === "metade") return { tipo: "metade" };
   if (v === "integral_pagador") return { tipo: "integral", responsavel: "pagador" };
   if (v === "integral_recebedora") return { tipo: "integral", responsavel: "recebedora" };
   if (v === "fixo") {
     const valorPagador = lerReais(String(form.get("valor_fixo") ?? ""));
-    if (!valorPagador) voltarComErro("Informe o valor fixo do pai.");
+    if (!valorPagador) voltarComErro(voltar, "Informe o valor fixo do pai.");
     return { tipo: "fixo", valorPagador };
   }
   return null;
 }
 
 export async function lancarDespesa(form: FormData) {
+  const voltar = paginaDeVolta(form);
   const ctx = await carregarContexto();
   const valor = lerReais(String(form.get("valor") ?? ""));
-  if (!valor) voltarComErro("Valor inválido.");
+  if (!valor) voltarComErro(voltar, "Valor inválido.");
   const competencia = lerMes(String(form.get("competencia") ?? ""));
-  if (!competencia) voltarComErro("Informe o mês como MM/AAAA, por exemplo 10/2024.");
+  if (!competencia) voltarComErro(voltar, "Informe o mês como MM/AAAA, por exemplo 10/2024.");
 
   const tipos = (await carregarTipos(ctx)).filter((t) => t.ativo);
   const tipo = acharTipo(tipos, String(form.get("tipo")));
-  if (!tipo) voltarComErro("Escolha o tipo de despesa.");
-  const manual = divisaoManual(form);
-  if (!tipo.divisao && !manual) voltarComErro("Escolha a divisão da despesa.");
+  if (!tipo) voltarComErro(voltar, "Escolha o tipo de despesa.");
+  const manual = divisaoManual(form, voltar);
+  if (!tipo.divisao && !manual) voltarComErro(voltar, "Escolha a divisão da despesa.");
   const regra = regraDoTipo(tipo, manual ?? undefined);
   const d = regra.divisao;
 
   const arquivos = arquivosDoForm(form);
   const problema = validarArquivos(arquivos);
-  if (problema) voltarComErro(problema);
+  if (problema) voltarComErro(voltar, problema);
 
   const { data, error } = await ctx.supabase
     .from("despesas")
@@ -59,15 +66,17 @@ export async function lancarDespesa(form: FormData) {
       divisao_responsavel: d.tipo === "integral" ? d.responsavel : null,
       divisao_valor_pagador: d.tipo === "fixo" ? d.valorPagador : null,
       lancado_por: ctx.user.id,
+      // Só manda o campo quando marcado, para funcionar antes da migração 0005.
+      ...(form.get("pendente") === "1" ? { pendente: true } : {}),
     })
     .select("id")
     .single();
-  if (error) voltarComErro(error.message);
+  if (error) voltarComErro(voltar, error.message);
 
   try {
     await salvarComprovantes(ctx, arquivos, { despesa_id: data.id });
   } catch (e) {
-    voltarComErro(`Despesa salva, mas o comprovante falhou: ${(e as Error).message}`);
+    voltarComErro(voltar, `Despesa salva, mas o comprovante falhou: ${(e as Error).message}`);
   }
-  redirect(`/despesas/${data.id}`);
+  redirect(voltar === "/lancar" ? `/despesas/${data.id}` : voltar);
 }

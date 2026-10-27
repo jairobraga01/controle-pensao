@@ -5,9 +5,10 @@ describe("importação CSV", () => {
   it("lê o modelo sem erros", () => {
     const r = lerCsv(MODELO_CSV);
     expect(r.erros).toEqual([]);
-    expect(r.despesas).toHaveLength(5);
+    expect(r.despesas).toHaveLength(11);
+    expect(r.despesas.filter((d) => d.pendente).map((d) => d.valor)).toEqual([27980, 76920, 15980, 24000]);
     expect(r.pagamentos).toEqual([
-      { linha: 7, competencia: "2026-10", data: "2026-10-08", valor: 283536, forma: "pix" },
+      { linha: 9, competencia: "2026-10", data: "2026-10-10", valor: 382248, forma: "pix" },
     ]);
     const van = r.despesas.find((d) => d.tipo === "van")!;
     expect(van.divisao).toEqual({ tipo: "fixo", valorPagador: 20000 });
