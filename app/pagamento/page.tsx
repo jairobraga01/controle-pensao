@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { Menu } from "@/components/Menu";
 import { formatarReais, nomeDoMes } from "@/lib/calculo";
 import { carregarContexto, carregarLancamentos, competenciaAtual, hojeISO, resumir } from "@/lib/dados";
+import { ValorPagamento } from "@/components/ValorPagamento";
+import { blocosDoMes } from "@/lib/planilha";
 import { registrarPagamento } from "./actions";
 
 export default async function Pagamento({
@@ -14,8 +16,12 @@ export default async function Pagamento({
   const ctx = await carregarContexto();
   if (ctx.eu.papel !== "pagador") redirect("/");
   const competencia = mes && /^\d{4}-\d{2}$/.test(mes) ? mes : competenciaAtual();
-  const { despesas, pagamentos } = await carregarLancamentos(ctx, competencia);
+  const [{ despesas, pagamentos }, todas] = await Promise.all([
+    carregarLancamentos(ctx, competencia),
+    carregarLancamentos(ctx),
+  ]);
   const r = resumir(ctx, competencia, despesas, pagamentos);
+  const pendentes = blocosDoMes(competencia, todas.despesas).find((b) => b.chave === "pendentes")!;
   const sugerido = Math.max(r.saldo, 0);
 
   return (
@@ -31,10 +37,13 @@ export default async function Pagamento({
         </section>
         <form action={registrarPagamento} className="cartao">
           <input type="hidden" name="competencia" value={competencia} />
-          <div className="grade2">
-            <label>Valor pago (R$)<input name="valor" required inputMode="decimal" defaultValue={(sugerido / 100).toFixed(2).replace(".", ",")} /></label>
-            <label>Data<input name="data" type="date" required defaultValue={hojeISO()} /></label>
-          </div>
+          <ValorPagamento
+            saldo={sugerido}
+            pendencias={pendentes.itens.length}
+            totalPendencias={pendentes.totalValor}
+            efeitoPendencias={pendentes.totalParte}
+          />
+          <label>Data<input name="data" type="date" required defaultValue={hojeISO()} /></label>
           <label>
             Forma
             <select name="forma" defaultValue="pix">

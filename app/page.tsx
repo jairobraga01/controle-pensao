@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { FormDespesa } from "@/components/FormDespesa";
 import { Menu } from "@/components/Menu";
 import { SeletorMes } from "@/components/SeletorMes";
-import { formatarReais, nomeDoMes, statusDoMes, type Parte } from "@/lib/calculo";
+import { formatarReais, statusDoMes, type Parte } from "@/lib/calculo";
 import {
   carregarContexto,
   carregarExtrato,
@@ -44,12 +43,14 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
   const primeiro = (p: Parte, padrao: string) => membroPorPapel(ctx, p)?.nome.split(" ")[0] || padrao;
   const nomes: Record<Parte, string> = { recebedora: primeiro("recebedora", "Mãe"), pagador: primeiro("pagador", "Pai") };
   const blocos = Object.fromEntries(blocosDoMes(mes.competencia, despesas).map((b) => [b.chave, b])) as Record<Bloco["chave"], Bloco>;
+  const pendentes = blocos.pendentes;
 
-  function TabelaBloco({ bloco, titulo, totalRotulo }: { bloco: Bloco; titulo: string; totalRotulo: string }) {
+  // Um bloco da planilha (aba 10-2026), aberto dentro da Composição do mês.
+  function TabelaBloco({ bloco, titulo }: { bloco: Bloco; titulo: string }) {
     const tiposDoBloco = bloco.categoria ? tipos.filter((t) => t.categoria === bloco.categoria) : tipos;
-    const pendentes = bloco.chave === "pendentes";
+    const ehPendente = bloco.chave === "pendentes";
     return (
-      <section className="cartao planilha">
+      <div className="planilha">
         <div className="pl-linha pl-cab">
           <span>{titulo}</span>
           <span>Valor</span>
@@ -62,7 +63,7 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
               <span className="num">{formatarReais(i.valor)}</span>
               <span className={`num${i.parte < 0 ? " negativo" : ""}`}>{formatarReais(i.parte)}</span>
             </Link>
-            {pendentes && podeLancar && (
+            {ehPendente && podeLancar && (
               <form action={incluirPendente} className="pl-acao">
                 <input type="hidden" name="id" value={i.id} />
                 <input type="hidden" name="mes" value={mes.competencia} />
@@ -71,9 +72,9 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
             )}
           </div>
         ))}
-        {bloco.itens.length === 0 && <p className="dica">Nenhuma despesa.</p>}
+        {bloco.itens.length === 0 && <p className="dica pl-vazio">Nenhuma despesa.</p>}
         <div className="pl-linha pl-total">
-          <span>{totalRotulo}</span>
+          <span>Total</span>
           <span className="num">{formatarReais(bloco.totalValor)}</span>
           <span className={`num${bloco.totalParte < 0 ? " negativo" : ""}`}>{formatarReais(bloco.totalParte)}</span>
         </div>
@@ -84,30 +85,29 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
               tipos={tiposDoBloco}
               pagaPor={bloco.pagaPor}
               competencia={mes.competencia}
-              pendente={pendentes}
+              pendente={ehPendente}
               voltar={voltar}
               hoje={hoje}
               nomes={nomes}
             />
           </details>
         )}
-      </section>
+      </div>
     );
   }
 
   return (
     <div className="app">
-      <header className="topo" style={{ justifyContent: "space-between" }}>
-        <div>
+      <header className="topo" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div style={{ minWidth: 0 }}>
           <small>Olá, {ctx.eu.nome.split(" ")[0]}</small>
-          <h1 style={{ textTransform: "capitalize" }}>{nomeDoMes(mes.competencia)}</h1>
+          <SeletorMes meses={lista} atual={mes.competencia} />
         </div>
         <form action={sair}>
           <button className="botao contorno" style={{ padding: "8px 12px", fontSize: 13 }}>Sair</button>
         </form>
       </header>
       <main className="conteudo">
-        <SeletorMes meses={lista} atual={mes.competencia} />
         {sp.erro && <div className="alerta">{sp.erro}</div>}
 
         <section className="destaque">
@@ -117,22 +117,48 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
             <span className={`selo ${status}`}>{ROTULO[status]}</span> vence em {dataCurta(mes.vencimento).replace(/-/g, "/")}
           </span>
           {ctx.eu.papel === "pagador" && mes.saldo > 0 && (
-            <Link className="botao claro" href={`/pagamento?mes=${mes.competencia}`}>
-              Registrar pagamento de {mesParaTela(mes.competencia)}
-            </Link>
+            <Link className="botao claro" href={`/pagamento?mes=${mes.competencia}`}>Registrar pagamento</Link>
           )}
         </section>
 
-        <section className="cartao">
+        <section className="cartao composicao">
           <h2>Composição do mês</h2>
           <div className="linha"><span>Pensão ({mes.percentualPensao}% de {formatarReais(mes.salarioMinimo)})</span><span className="num">{formatarReais(mes.pensao)}</span></div>
-          <div className="linha"><span>Despesas médicas, escolares e van (saldo)</span><span className="num">{formatarReais(mes.despesasDecisao)}</span></div>
-          <div className="linha"><span>Natação, roupas e outras</span><span className="num">{formatarReais(mes.despesasCombinadas)}</span></div>
-          <div className="linha"><span>Já pago</span><span className="num">{formatarReais(mes.pago)}</span></div>
+          <details>
+            <summary className="linha"><span>Despesas da decisão (saldo 50%)</span><span className="num">{formatarReais(mes.despesasDecisao)}</span></summary>
+            <TabelaBloco bloco={blocos.decisao_recebedora} titulo={`Despesas Decisão - ${nomes.recebedora}`} />
+            <TabelaBloco bloco={blocos.decisao_pagador} titulo={`Despesas Decisão - ${nomes.pagador}`} />
+          </details>
+          <details>
+            <summary className="linha"><span>Despesas combinadas</span><span className="num">{formatarReais(mes.despesasCombinadas)}</span></summary>
+            <TabelaBloco bloco={blocos.combinada_recebedora} titulo={`Despesas Extras - ${nomes.recebedora}`} />
+            <TabelaBloco bloco={blocos.combinada_pagador} titulo={`Despesas Extras - ${nomes.pagador}`} />
+          </details>
+          {mes.pago > 0 && <div className="linha"><span>Já pago</span><span className="num">{formatarReais(mes.pago)}</span></div>}
           <div className="divisor" />
           <div className="linha suave"><span>Vai no recibo judicial</span><span className="num">{formatarReais(mes.totalRecibo)}</span></div>
           <div className="linha suave"><span>Vai no recibo extra</span><span className="num">{formatarReais(mes.totalDemonstrativo)}</span></div>
+          <p className="dica">Toque nas despesas para ver o detalhe no modelo da planilha e incluir novas.</p>
         </section>
+
+        {pendentes.itens.length > 0 ? (
+          <details className="alerta pendencia">
+            <summary>
+              <strong>Pendência: outras despesas</strong>
+              <br />
+              {formatarReais(pendentes.totalValor)} em {pendentes.itens.length}{" "}
+              {pendentes.itens.length === 1 ? "despesa" : "despesas"}. Ainda não entram no cálculo.
+            </summary>
+            <TabelaBloco bloco={pendentes} titulo="Outras Despesas Pendentes" />
+          </details>
+        ) : (
+          podeLancar && (
+            <details className="cartao pendencia">
+              <summary className="dica">+ Registrar despesa pendente (fica fora do cálculo)</summary>
+              <TabelaBloco bloco={pendentes} titulo="Outras Despesas Pendentes" />
+            </details>
+          )
+        )}
 
         {devedorAnterior > 0 && (
           <Link href="/extrato?filtro=abertos" className="alerta" style={{ textDecoration: "none" }}>
@@ -147,23 +173,6 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
           </div>
         )}
 
-        <TabelaBloco bloco={blocos.decisao_recebedora} titulo={`Despesas Decisão - ${nomes.recebedora}`} totalRotulo={`Total ${nomes.recebedora}`} />
-        <TabelaBloco bloco={blocos.combinada_recebedora} titulo={`Despesas Extras - ${nomes.recebedora}`} totalRotulo={`Total ${nomes.recebedora}`} />
-        <TabelaBloco bloco={blocos.decisao_pagador} titulo={`Despesas Decisão - ${nomes.pagador}`} totalRotulo={`Total ${nomes.pagador}`} />
-        <TabelaBloco bloco={blocos.combinada_pagador} titulo={`Despesas Extras - ${nomes.pagador}`} totalRotulo={`Total ${nomes.pagador}`} />
-
-        <section className="cartao planilha resumo">
-          <div className="pl-linha"><span>Pensão Alimentícia ({mes.percentualPensao}% de {formatarReais(mes.salarioMinimo)})</span><span className="num">{formatarReais(mes.pensao)}</span></div>
-          <div className="pl-linha"><span>Diferença - Valor a transferir - Despesas Decisão</span><span className="num">{formatarReais(mes.despesasDecisao)}</span></div>
-          <div className="pl-linha pl-total"><span>Total</span><span className="num">{formatarReais(mes.totalRecibo)}</span></div>
-          <div className="pl-linha"><span>Diferença - Valor a transferir - Despesas Extras</span><span className="num">{formatarReais(mes.totalDemonstrativo)}</span></div>
-          <div className="pl-linha suave"><span>Já pago</span><span className="num">{formatarReais(mes.pago)}</span></div>
-          <div className="pl-linha suave"><span>Ver todos os meses</span><Link href="/extrato">Extrato</Link></div>
-        </section>
-
-        <TabelaBloco bloco={blocos.pendentes} titulo="Outras Despesas Pendentes" totalRotulo="Total" />
-        <p className="dica">As pendentes não entram no cálculo nem nos recibos até serem incluídas num mês.</p>
-
         <section className="cartao">
           <div className="linha"><h2>Últimos lançamentos</h2><Link href="/extrato" style={{ fontSize: 13, fontWeight: 600 }}>Ver extrato</Link></div>
           {ultimas.length === 0 ? (
@@ -175,8 +184,7 @@ export default async function Painel({ searchParams }: { searchParams: Promise<{
                   <Link href={`/despesas/${d.id}`} style={{ color: "inherit", textDecoration: "none" }}>
                     {d.descricao}
                     <small>
-                      {d.paga_por === "pagador" ? `Pago por ${nomes.pagador}` : `Pago por ${nomes.recebedora}`} ·{" "}
-                      {rotuloDoTipo(todosTipos, d.tipo)}
+                      {nomes[d.paga_por]} · {rotuloDoTipo(todosTipos, d.tipo)}
                       {d.pendente ? " · pendente" : ""}
                       {d.contestada_em ? " · contestada" : ""}
                     </small>

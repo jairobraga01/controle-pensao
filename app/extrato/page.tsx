@@ -2,18 +2,20 @@ import Link from "next/link";
 import { Menu } from "@/components/Menu";
 import { formatarReais, nomeDoMes, saldoAcumulado, statusDoMes, type StatusMes } from "@/lib/calculo";
 import { carregarContexto, carregarExtrato, hojeISO } from "@/lib/dados";
+import { blocosDoMes } from "@/lib/planilha";
 
 const ROTULO: Record<StatusMes, string> = { quitado: "Quitado", aberto: "Aberto", atrasado: "Em atraso" };
 const FILTROS = [
   { id: "todos", rotulo: "Todos" },
   { id: "abertos", rotulo: "Em aberto" },
-  { id: "quitados", rotulo: "Quitados" },
+  { id: "quitados", rotulo: "Pagos" },
 ];
 
 export default async function Extrato({ searchParams }: { searchParams: Promise<{ filtro?: string }> }) {
   const { filtro = "todos" } = await searchParams;
   const ctx = await carregarContexto();
-  const { meses } = await carregarExtrato(ctx);
+  const { meses, despesas } = await carregarExtrato(ctx);
+  const pendentes = blocosDoMes("", despesas).find((b) => b.chave === "pendentes")!;
   const hoje = hojeISO();
   const comStatus = meses.map((m) => ({ ...m, status: statusDoMes(m, hoje) }));
   const visiveis = comStatus.filter((m) =>
@@ -58,6 +60,19 @@ export default async function Extrato({ searchParams }: { searchParams: Promise<
 
         <section className="cartao">
           <ul className="lista">
+            {filtro !== "quitados" && pendentes.itens.length > 0 && (
+              <li>
+                <Link href="/" style={{ color: "inherit", textDecoration: "none" }}>
+                  <span style={{ fontWeight: 600 }}>Outras despesas pendentes</span>
+                  <small>{pendentes.itens.length} {pendentes.itens.length === 1 ? "despesa" : "despesas"} fora do cálculo</small>
+                </Link>
+                <span style={{ textAlign: "right" }}>
+                  <span className="num">{formatarReais(pendentes.totalValor)}</span>
+                  <br />
+                  <span className="selo atrasado">Pendente</span>
+                </span>
+              </li>
+            )}
             {visiveis.map((m) => (
               <li key={m.competencia}>
                 <span>

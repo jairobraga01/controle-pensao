@@ -19,6 +19,20 @@ export async function registrarPagamento(form: FormData) {
   const problema = validarArquivos(arquivos);
   if (problema) erro(problema);
 
+  // Pendências marcadas para quitar entram no cálculo deste mês antes do recibo.
+  if (form.get("quitar_pendentes") === "1") {
+    const { data: pendentes } = await ctx.supabase
+      .from("despesas")
+      .select("id")
+      .eq("processo_id", ctx.processo.id)
+      .eq("pendente", true)
+      .is("contestada_em", null);
+    for (const p of pendentes ?? []) {
+      const { error } = await ctx.supabase.rpc("incluir_pendente", { p_despesa: p.id, p_competencia: competencia });
+      if (error) erro(`Não foi possível incluir as pendências: ${error.message}`);
+    }
+  }
+
   const { data: pag, error } = await ctx.supabase
     .from("pagamentos")
     .insert({
