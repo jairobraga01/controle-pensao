@@ -36,8 +36,8 @@ export default async function Lancar({ searchParams }: { searchParams: Promise<{
             <CampoMes name="competencia" valor={competenciaAtual()} />
           </label>
           <label>
-            Comprovante (obrigatório)
-            <CampoComprovante processoId={ctx.processo.id} />
+            Comprovante (opcional)
+            <CampoComprovante processoId={ctx.processo.id} obrigatorio={false} />
           </label>
           {erro && <p className="erro">{erro}</p>}
           <BotaoEnviar>Salvar despesa</BotaoEnviar>

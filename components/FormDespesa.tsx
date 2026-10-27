@@ -47,8 +47,8 @@ export function FormDespesa(props: {
         </label>
       )}
       <label>
-        Comprovante (obrigatório)
-        <CampoComprovante processoId={props.processoId} />
+        Comprovante (opcional)
+        <CampoComprovante processoId={props.processoId} obrigatorio={false} />
       </label>
       <BotaoEnviar>Incluir despesa</BotaoEnviar>
     </form>
