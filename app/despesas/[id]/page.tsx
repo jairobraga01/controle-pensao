@@ -6,9 +6,7 @@ import { linksDosComprovantes } from "@/lib/comprovantes";
 import { carregarContexto, carregarTipos, paraDespesa, type LinhaDespesa } from "@/lib/dados";
 import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { CampoComprovante } from "@/components/CampoComprovante";
-import { CampoMes } from "@/components/CampoMes";
-import { TipoDespesa } from "@/components/TipoDespesa";
-import { alterarDespesa, anexarComprovante, contestar, excluirComprovante, excluirDespesa } from "./actions";
+import { anexarComprovante, contestar, excluirComprovante, excluirDespesa } from "./actions";
 import { nomeDoRecibo, rotuloDoTipo } from "@/lib/tipos";
 
 const DIVISAO = { metade: "50% cada", integral: "100%", fixo: "valor fixo para o pai" };
@@ -34,10 +32,6 @@ export default async function DetalheDespesa({
   const podeContestar = ctx.eu.papel !== "advogado" && d.lancado_por !== ctx.user.id && !d.contestada_em;
   const { data: confirmado } = await ctx.supabase.rpc("mes_confirmado", { p: ctx.processo.id, c: d.competencia });
   const podeAlterar = ctx.eu.papel !== "advogado" && d.lancado_por === ctx.user.id && !confirmado;
-  const tiposAlteracao = tipos.filter((t) => t.ativo || t.codigo === d.tipo);
-  const divisaoInicial =
-    d.divisao_tipo === "integral" ? `integral_${d.divisao_responsavel}` : d.divisao_tipo;
-  const fixoInicial = d.divisao_valor_pagador ? (d.divisao_valor_pagador / 100).toFixed(2).replace(".", ",") : "";
 
   return (
     <div className="app">
@@ -67,6 +61,7 @@ export default async function DetalheDespesa({
             <strong>Efeito no valor do mês</strong>
             <strong className="num">{efeito >= 0 ? "+" : ""}{formatarReais(efeito)}</strong>
           </div>
+          {podeAlterar && <Link href={`/lancar?editar=${d.id}`} className="botao">Alterar despesa</Link>}
         </section>
 
         {d.contestada_em && (
@@ -106,30 +101,6 @@ export default async function DetalheDespesa({
             </form>
           )}
         </section>
-
-        {podeAlterar && (
-          <details className="cartao">
-            <summary><h2 style={{ display: "inline" }}>Alterar despesa</h2></summary>
-            <form action={alterarDespesa} style={{ marginTop: 12 }}>
-              <input type="hidden" name="id" value={d.id} />
-              <label>Descrição<input name="descricao" required defaultValue={d.descricao} /></label>
-              <div className="grade2">
-                <label>Valor total (R$)<input name="valor" required inputMode="decimal" defaultValue={(d.valor_centavos / 100).toFixed(2).replace(".", ",")} /></label>
-                <label>Data<input name="data" type="date" required defaultValue={d.data} /></label>
-              </div>
-              <label>
-                Quem pagou
-                <select name="paga_por" defaultValue={d.paga_por}>
-                  <option value="pagador">Pai</option>
-                  <option value="recebedora">Mãe</option>
-                </select>
-              </label>
-              <TipoDespesa tipos={tiposAlteracao} inicial={{ codigo: d.tipo, divisao: divisaoInicial, fixo: fixoInicial }} />
-              <label>Mês em que entra no cálculo<CampoMes name="competencia" valor={d.competencia} /></label>
-              <BotaoEnviar>Salvar alterações</BotaoEnviar>
-            </form>
-          </details>
-        )}
 
         {podeAlterar && (
           <details className="cartao">

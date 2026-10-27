@@ -4,13 +4,15 @@ import { redirect } from "next/navigation";
 import { lerReais } from "@/lib/calculo";
 import { enviadosDoForm, registrarEnviados } from "@/lib/comprovantes";
 import { carregarContexto, carregarLancamentos, contaNoCalculo, paraDespesa, resumir } from "@/lib/dados";
-import { TIPOS_RECIBO, itensDoRecibo, valorDoRecibo } from "@/lib/recibo";
+import { ehTipoRecibo, itensDoRecibo, valorDoRecibo, type TipoRecibo } from "@/lib/recibo";
 
 export async function registrarPagamento(form: FormData) {
   const ctx = await carregarContexto();
   const competencia = String(form.get("competencia"));
+  const destino = String(form.get("destino"));
   const erro = (msg: string): never =>
-    redirect(`/pagamento?mes=${competencia}&erro=${encodeURIComponent(msg)}`);
+    redirect(`/pagamento?mes=${competencia}&bloco=${destino}&erro=${encodeURIComponent(msg)}`);
+  if (!ehTipoRecibo(destino)) erro("Escolha o bloco do pagamento.");
 
   if (ctx.eu.papel !== "pagador") erro("Só quem paga registra pagamentos.");
   const valor = lerReais(String(form.get("valor") ?? ""));
@@ -18,13 +20,14 @@ export async function registrarPagamento(form: FormData) {
   const enviados = enviadosDoForm(form, ctx.processo.id);
   if (!enviados.length) erro("Anexe pelo menos um comprovante.");
 
-  // Pendências marcadas para quitar entram no cálculo deste mês antes do recibo.
+  // Pendências do bloco marcadas para quitar entram no cálculo deste mês antes do recibo.
   if (form.get("quitar_pendentes") === "1") {
     const { data: pendentes } = await ctx.supabase
       .from("despesas")
       .select("id")
       .eq("processo_id", ctx.processo.id)
       .eq("pendente", true)
+      .eq("categoria", destino === "judicial" ? "decisao" : "combinada")
       .is("contestada_em", null);
     for (const p of pendentes ?? []) {
       const { error } = await ctx.supabase.rpc("incluir_pendente", { p_despesa: p.id, p_competencia: competencia });
@@ -40,6 +43,7 @@ export async function registrarPagamento(form: FormData) {
       valor_centavos: valor,
       data: String(form.get("data")),
       forma: String(form.get("forma")),
+      destino,
       registrado_por: ctx.user.id,
     })
     .select("id")
@@ -52,12 +56,12 @@ export async function registrarPagamento(form: FormData) {
     erro(`Pagamento salvo, mas o comprovante falhou: ${(e as Error).message}`);
   }
 
-  await gerarRecibos(competencia);
-  redirect(`/recibos/${competencia}/judicial`);
+  await gerarRecibo(competencia, destino as TipoRecibo);
+  redirect(`/recibos/${competencia}/${destino}`);
 }
 
-/** Cria ou atualiza os recibos do mês, enquanto a mãe ainda não confirmou. */
-async function gerarRecibos(competencia: string) {
+/** Cria ou atualiza o recibo do bloco pago, enquanto a mãe ainda não confirmou. */
+async function gerarRecibo(competencia: string, tipo: TipoRecibo) {
   const ctx = await carregarContexto();
   const { despesas, pagamentos } = await carregarLancamentos(ctx, competencia);
   const resumo = resumir(ctx, competencia, despesas, pagamentos);
@@ -68,21 +72,17 @@ async function gerarRecibos(competencia: string) {
     .eq("processo_id", ctx.processo.id)
     .eq("competencia", competencia);
 
-  for (const tipo of TIPOS_RECIBO) {
-    const itens = itensDoRecibo(tipo, resumo, validas);
-    const existente = existentes?.find((r) => r.tipo === tipo);
-    // Mês sem despesas combinadas não tem recibo extra.
-    if (tipo === "extra" && itens.length === 0 && !existente) continue;
-    const linha = {
-      processo_id: ctx.processo.id,
-      competencia,
-      tipo,
-      valor_centavos: valorDoRecibo(tipo, resumo),
-      itens,
-      gerado_por: ctx.user.id,
-      gerado_em: new Date().toISOString(),
-    };
-    if (!existente) await ctx.supabase.from("recibos").insert(linha);
-    else if (!existente.confirmado_em) await ctx.supabase.from("recibos").update(linha).eq("id", existente.id);
-  }
+  const itens = itensDoRecibo(tipo, resumo, validas);
+  const existente = existentes?.find((r) => r.tipo === tipo);
+  const linha = {
+    processo_id: ctx.processo.id,
+    competencia,
+    tipo,
+    valor_centavos: valorDoRecibo(tipo, resumo),
+    itens,
+    gerado_por: ctx.user.id,
+    gerado_em: new Date().toISOString(),
+  };
+  if (!existente) await ctx.supabase.from("recibos").insert(linha);
+  else if (!existente.confirmado_em) await ctx.supabase.from("recibos").update(linha).eq("id", existente.id);
 }

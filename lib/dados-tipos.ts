@@ -29,6 +29,8 @@ export interface LinhaPagamento {
   data: string;
   forma: string;
   importado: boolean;
+  /** Recibo a que o pagamento se refere; vazio nos antigos/importados. */
+  destino?: "judicial" | "extra" | null;
 }
 
 /** Despesas contestadas ou pendentes ficam fora do cálculo e dos recibos. */
@@ -52,4 +54,21 @@ export function paraDespesa(l: LinhaDespesa): Despesa {
     categoria: l.categoria,
     divisao,
   };
+}
+
+/**
+ * Quanto já foi pago para cada recibo do mês. Pagamentos sem destino
+ * (antigos ou importados) cobrem primeiro o judicial e o resto vai para o extra.
+ */
+export function pagoPorRecibo(
+  totalJudicial: number,
+  pagamentos: Pick<LinhaPagamento, "valor_centavos" | "destino">[],
+): { judicial: number; extra: number } {
+  const soma = (f: (p: (typeof pagamentos)[number]) => boolean) =>
+    pagamentos.filter(f).reduce((s, p) => s + p.valor_centavos, 0);
+  const judicial = soma((p) => p.destino === "judicial");
+  const extra = soma((p) => p.destino === "extra");
+  const semDestino = soma((p) => !p.destino);
+  const noJudicial = Math.min(semDestino, Math.max(totalJudicial - judicial, 0));
+  return { judicial: judicial + noJudicial, extra: extra + semDestino - noJudicial };
 }
