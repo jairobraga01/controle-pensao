@@ -74,19 +74,31 @@ input[type="checkbox"], input[type="radio"] { width: 20px; min-height: 20px; acc
 .recibo p { margin: 0 0 10px; }
 .recibo .itens { font-family: Inter, system-ui, sans-serif; font-size: 13px; background: #f7f8fa; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
 
-.seletor-mes { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 8px; }
-.seletor-mes select { text-transform: capitalize; }
-.seletor-mes button { border: 1px solid var(--borda); background: #fff; border-radius: 12px; font-size: 20px; cursor: pointer; color: var(--texto); }
-.seletor-mes button:disabled { opacity: 0.35; cursor: default; }
+.seletor-mes { display: flex; align-items: center; gap: 2px; margin-left: -8px; }
+.seletor-mes select { border: 0; background: transparent; min-height: 36px; padding: 0 4px; width: auto; font-size: 22px; font-weight: 700; text-transform: capitalize; cursor: pointer; }
+.seletor-mes button { border: 0; background: none; font-size: 22px; line-height: 1; padding: 4px 8px; cursor: pointer; color: var(--suave); }
+.seletor-mes button:disabled { opacity: 0.3; cursor: default; }
 
-.planilha { gap: 0; padding: 12px 14px; }
-.pl-linha { display: grid; grid-template-columns: minmax(0, 1fr) 92px 92px; gap: 8px; padding: 8px 0; font-size: 13px; color: inherit; text-decoration: none; border-bottom: 1px solid var(--linha); }
+.composicao details > summary { list-style: none; cursor: pointer; }
+.composicao details > summary::-webkit-details-marker, .pendencia > summary::-webkit-details-marker { display: none; }
+.composicao details > summary > span:first-child::after { content: " ▸"; color: var(--suave); font-size: 11px; }
+.composicao details[open] > summary > span:first-child::after { content: " ▾"; }
+.composicao details[open] { background: var(--fundo); border-radius: 12px; padding: 8px 10px; margin: 0 -10px; }
+.pendencia > summary { list-style: none; cursor: pointer; }
+.pendencia[open] .planilha { margin-top: 10px; }
+.pendencia .planilha { background: #fff; color: var(--texto); border-radius: 10px; padding: 4px 10px 8px; }
+
+.planilha { margin-top: 8px; }
+.pl-linha { display: grid; grid-template-columns: minmax(0, 1fr) 84px 84px; gap: 6px; padding: 7px 0; font-size: 12.5px; color: inherit; text-decoration: none; border-bottom: 1px solid var(--linha); }
 .pl-linha > span:not(:first-child) { text-align: right; white-space: nowrap; }
-.resumo .pl-linha { grid-template-columns: minmax(0, 1fr) 100px; }
-.pl-cab { font-weight: 700; font-size: 14px; }
+.pl-cab { font-weight: 700; font-size: 13px; }
 .pl-total { font-weight: 700; border-bottom: 0; }
-.pl-linha.suave { color: var(--suave); }
+.pl-vazio { padding: 6px 0; font-size: 12px; }
 .negativo { color: var(--erro); }
-.pl-acao { margin: -4px 0 6px; font-size: 12px; }
-.incluir summary { cursor: pointer; color: var(--marca); font-weight: 600; font-size: 14px; padding: 8px 0 2px; }
+.pl-acao { margin: -2px 0 6px; font-size: 12px; }
+.incluir summary { cursor: pointer; color: var(--marca); font-weight: 600; font-size: 13px; padding: 4px 0 2px; }
 .form-bloco { display: flex; flex-direction: column; gap: 10px; padding-top: 10px; }
+
+.segmento { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.segmento button { font: inherit; font-size: 14px; font-weight: 600; min-height: 44px; border-radius: 12px; border: 1px solid var(--borda); background: #fff; color: var(--texto); cursor: pointer; }
+.segmento button[aria-checked="true"] { background: var(--marca-claro); border-color: var(--marca); color: var(--marca); }
