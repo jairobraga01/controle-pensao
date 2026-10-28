@@ -56,6 +56,7 @@ export default async function Discriminacao({ searchParams }: { searchParams: Pr
           <div className="pl-linha"><span>Diferença - Valor a transferir - Despesas Decisão</span><span className="num">{formatarReais(mes.despesasDecisao)}</span></div>
           <div className="pl-linha pl-total"><span>Total</span><span className="num">{formatarReais(mes.totalRecibo)}</span></div>
           <div className="pl-linha"><span>Diferença - Valor a transferir - Despesas Extras</span><span className="num">{formatarReais(mes.totalDemonstrativo)}</span></div>
+          <div className="pl-linha pl-total"><span>Total Transferido no Mês</span><span className="num">{formatarReais(mes.total)}</span></div>
           {mes.pago > 0 && <div className="pl-linha suave"><span>Já pago no mês</span><span className="num">{formatarReais(mes.pago)}</span></div>}
         </section>
 
