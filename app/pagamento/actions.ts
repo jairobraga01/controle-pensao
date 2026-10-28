@@ -56,12 +56,12 @@ export async function registrarPagamento(form: FormData) {
     erro(`Pagamento salvo, mas o comprovante falhou: ${(e as Error).message}`);
   }
 
-  await gerarRecibo(competencia, destino as TipoRecibo);
+  await gerarRecibo(competencia, destino as TipoRecibo, String(form.get("data")));
   redirect(`/recibos/${competencia}/${destino}`);
 }
 
 /** Cria ou atualiza o recibo do bloco pago, enquanto a mãe ainda não confirmou. */
-async function gerarRecibo(competencia: string, tipo: TipoRecibo) {
+async function gerarRecibo(competencia: string, tipo: TipoRecibo, dataPagamento: string) {
   const ctx = await carregarContexto();
   const { despesas, pagamentos } = await carregarLancamentos(ctx, competencia);
   const resumo = resumir(ctx, competencia, despesas, pagamentos);
@@ -82,6 +82,7 @@ async function gerarRecibo(competencia: string, tipo: TipoRecibo) {
     itens,
     gerado_por: ctx.user.id,
     gerado_em: new Date().toISOString(),
+    data_pagamento: dataPagamento,
   };
   if (!existente) await ctx.supabase.from("recibos").insert(linha);
   else if (!existente.confirmado_em) await ctx.supabase.from("recibos").update(linha).eq("id", existente.id);

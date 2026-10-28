@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { calcularMes, type Despesa } from "./calculo";
-import { itensDoRecibo, textoDoRecibo, valorDoRecibo } from "./recibo";
+import { dataDoRecibo, itensDoRecibo, textoDoRecibo, valorDoRecibo } from "./recibo";
 import { REGRAS_DECISAO, SALARIOS_MINIMOS } from "./tabelas";
 import { TIPOS_PADRAO, acharTipo, regraDoTipo } from "./tipos";
 
@@ -48,5 +48,16 @@ describe("recibos do mês", () => {
     };
     expect(textoDoRecibo({ ...base, tipo: "extra" }).join(" ")).toContain("despesas extras");
     expect(textoDoRecibo({ ...base, tipo: "judicial" }).join(" ")).toContain("Pensão Alimentícia");
+  });
+});
+
+describe("dataDoRecibo", () => {
+  const extenso = (d: Date) =>
+    new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Sao_Paulo" }).format(d);
+  it("usa a data informada no pagamento, sem voltar um dia no fuso", () => {
+    expect(extenso(dataDoRecibo({ data_pagamento: "2026-01-10", confirmado_em: "2026-02-01T15:00:00Z" }))).toBe("10 de janeiro de 2026");
+  });
+  it("sem data do pagamento, cai no aceite", () => {
+    expect(extenso(dataDoRecibo({ confirmado_em: "2026-02-01T15:00:00Z" }))).toBe("1 de fevereiro de 2026");
   });
 });
