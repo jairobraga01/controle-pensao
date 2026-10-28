@@ -97,3 +97,10 @@ export function textoDoRecibo(r: DadosRecibo): string[] {
       `nos AUTOS nº ${r.processo.numero}, da ${r.processo.vara}.`,
   ];
 }
+
+/** Data impressa no recibo: a data informada no pagamento; recibos antigos sem ela usam o aceite ou a geração. */
+export function dataDoRecibo(r: { data_pagamento?: string | null; confirmado_em?: string | null; gerado_em?: string | null }): Date {
+  // Meio-dia UTC evita que a data volte um dia ao formatar no fuso de São Paulo.
+  if (r.data_pagamento) return new Date(`${r.data_pagamento}T12:00:00Z`);
+  return new Date(r.confirmado_em ?? r.gerado_em ?? Date.now());
+}

@@ -1,7 +1,7 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont } from "pdf-lib";
 import { formatarReais } from "@/lib/calculo";
 import { carregarContexto, membroPorPapel } from "@/lib/dados";
-import { TITULO_RECIBO, ehTipoRecibo, textoDoRecibo, type ItemRecibo } from "@/lib/recibo";
+import { TITULO_RECIBO, dataDoRecibo, ehTipoRecibo, textoDoRecibo, type ItemRecibo } from "@/lib/recibo";
 
 const MARGEM = 64;
 const LARGURA = 595.28; // A4
@@ -100,7 +100,7 @@ export async function GET(
 
   const quando = new Intl.DateTimeFormat("pt-BR", {
     day: "numeric", month: "long", year: "numeric", timeZone: "America/Sao_Paulo",
-  }).format(recibo.confirmado_em ? new Date(recibo.confirmado_em) : new Date());
+  }).format(dataDoRecibo(recibo));
   escrever(`${ctx.processo.cidade}, ${quando}.`);
 
   y -= 50;

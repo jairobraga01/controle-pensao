@@ -6,11 +6,11 @@ import { Menu } from "@/components/Menu";
 import { formatarReais, nomeDoMes } from "@/lib/calculo";
 import { linksDosComprovantes } from "@/lib/comprovantes";
 import { carregarContexto, membroPorPapel } from "@/lib/dados";
-import { TITULO_RECIBO, ehTipoRecibo, textoDoRecibo, type ItemRecibo } from "@/lib/recibo";
+import { TITULO_RECIBO, dataDoRecibo, ehTipoRecibo, textoDoRecibo, type ItemRecibo } from "@/lib/recibo";
 import { anexarAssinado, confirmar } from "./actions";
 
-function dataPorExtenso(iso: string) {
-  return new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Sao_Paulo" }).format(new Date(iso));
+function dataPorExtenso(data: Date) {
+  return new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Sao_Paulo" }).format(data);
 }
 
 export default async function Recibo({
@@ -84,7 +84,7 @@ export default async function Recibo({
             ))}
           </div>
           <p>{paragrafos[2]}</p>
-          {recibo.confirmado_em && <p>{ctx.processo.cidade}, {dataPorExtenso(recibo.confirmado_em)}.</p>}
+          <p>{ctx.processo.cidade}, {dataPorExtenso(dataDoRecibo(recibo))}.</p>
         </article>
 
         {ctx.eu.papel === "recebedora" && !recibo.confirmado_em && (
