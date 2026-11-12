@@ -1,6 +1,7 @@
 import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { CampoComprovante } from "@/components/CampoComprovante";
 import { CampoMes } from "@/components/CampoMes";
+import { CampoParcelas } from "@/components/CampoParcelas";
 import { TipoDespesa } from "@/components/TipoDespesa";
 import { lancarDespesa } from "@/app/lancar/actions";
 import type { Parte } from "@/lib/calculo";
@@ -46,6 +47,7 @@ export function FormDespesa(props: {
           <CampoMes name="competencia" valor={props.competencia} />
         </label>
       )}
+      {!props.pendente && <CampoParcelas />}
       <label>
         Comprovante (opcional)
         <CampoComprovante processoId={props.processoId} obrigatorio={false} />

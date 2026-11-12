@@ -3,6 +3,7 @@ import { BotaoEnviar } from "@/components/BotaoEnviar";
 import { redirect } from "next/navigation";
 import { CampoComprovante } from "@/components/CampoComprovante";
 import { CampoMes } from "@/components/CampoMes";
+import { CampoParcelas } from "@/components/CampoParcelas";
 import { Menu } from "@/components/Menu";
 import { TipoDespesa } from "@/components/TipoDespesa";
 import { carregarContexto, carregarTipos, competenciaAtual, hojeISO, type LinhaDespesa } from "@/lib/dados";
@@ -60,6 +61,7 @@ export default async function Lancar({ searchParams }: { searchParams: Promise<{
             Mês em que entra no cálculo
             <CampoMes name="competencia" valor={d?.competencia ?? competenciaAtual()} />
           </label>
+          {!d && <CampoParcelas />}
           <label>
             {d ? "Anexar outro comprovante (opcional)" : "Comprovante (opcional)"}
             <CampoComprovante processoId={ctx.processo.id} obrigatorio={false} />
