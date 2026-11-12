@@ -16,7 +16,7 @@ import { blocosDoMes, type Bloco } from "@/lib/planilha";
 export default async function Discriminacao({ searchParams }: { searchParams: Promise<{ mes?: string; erro?: string }> }) {
   const sp = await searchParams;
   const ctx = await carregarContexto();
-  const [{ meses, despesas }, todosTipos] = await Promise.all([carregarExtrato(ctx), carregarTipos(ctx)]);
+  const [{ meses, despesas }, todosTipos] = await Promise.all([carregarExtrato(ctx, { futuros: true }), carregarTipos(ctx)]);
   const lista = meses.map((m) => m.competencia);
   const escolhido = lista.includes(sp.mes ?? "") ? sp.mes! : competenciaAtual();
   const mes = meses.find((m) => m.competencia === escolhido) ?? meses[0];

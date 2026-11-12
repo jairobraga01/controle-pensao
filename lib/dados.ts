@@ -8,6 +8,7 @@ import {
   type ResumoMes,
   type SalarioMinimo,
 } from "./calculo";
+import { somarMeses } from "./parcelas";
 import { contaNoCalculo, paraDespesa, type LinhaDespesa, type LinhaPagamento } from "./dados-tipos";
 import { TIPOS_PADRAO, paraTipo, type LinhaTipo, type TipoCadastro } from "./tipos";
 import { criarClienteServidor } from "./supabase/server";
@@ -136,9 +137,18 @@ export function resumir(
 }
 
 /** Todos os meses desde o início do processo até o mês atual, mais recente primeiro. */
-export async function carregarExtrato(ctx: Contexto) {
+/**
+ * Meses do início até o mês atual. Com `futuros`, vai também até o próximo mês
+ * (ou até a última parcela já lançada), para as telas que lançam despesas.
+ */
+export async function carregarExtrato(ctx: Contexto, opcoes: { futuros?: boolean } = {}) {
   const { despesas, pagamentos } = await carregarLancamentos(ctx);
-  const meses = competencias(ctx.processo.inicio_competencia, competenciaAtual())
+  let fim = competenciaAtual();
+  if (opcoes.futuros) {
+    fim = somarMeses(fim, 1);
+    for (const d of despesas) if (d.competencia > fim) fim = d.competencia;
+  }
+  const meses = competencias(ctx.processo.inicio_competencia, fim)
     .map((c) => resumir(ctx, c, despesas, pagamentos))
     .reverse();
   return { meses, despesas, pagamentos };
