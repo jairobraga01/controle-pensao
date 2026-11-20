@@ -9,8 +9,6 @@ on:
   schedule:
     - cron: "0 12 * * *" # todo dia às 12:00 UTC (09:00 em Brasília)
   workflow_dispatch: {} # permite rodar na mão pela aba Actions
-  push: # TEMPORÁRIO: só para testar antes do merge
-    branches: [claude/project-thread-rf70kt]
 
 permissions: {}
 
